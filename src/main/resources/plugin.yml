@@ -1,0 +1,16 @@
+name: StackMob
+main: uk.antiperson.stackmob.StackMob
+version: 1.6.1b
+website: https://www.spigotmc.org/resources/stackmob.29999/
+author: antiPerson
+softdepend: [WorldGuard, MythicMobs]
+commands:
+    sm:
+       description: The main command
+permissions:
+    stackmob.admin:
+      description: All administrator commands
+    stackmob.*:
+      description: All commands
+    stackmob.listcommands:
+      description: Allows the player to list all commands
