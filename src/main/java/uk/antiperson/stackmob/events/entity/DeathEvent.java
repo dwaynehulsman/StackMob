@@ -40,7 +40,6 @@ public class DeathEvent implements Listener {
                 if(killAll){
                     if(config.getFilecon().getBoolean("creature.kill-all.drops.multiply")){
                         multiplyDrops(e.getDrops(), ea, e.getEntity().getKiller(),  st.amountMap.get(ea.getUniqueId()));
-                        st.getLogger().info(e.getDrops().size() + ", " + (ea != null) + ", " + (e.getEntity().getKiller() != null) + " ," + st.amountMap.get(ea.getUniqueId()));
                     }
                     e.setDroppedExp((int) generateXpRandom(st.amountMap.get(ea.getUniqueId()), e.getDroppedExp()));
                     if(ea instanceof Slime){
@@ -55,10 +54,8 @@ public class DeathEvent implements Listener {
                     int n = config.getFilecon().getInt("creature.kill-step-min") + new Random().nextInt(diff) + 1;
                     if(st.amountMap.get(ea.getUniqueId()) <= n){
                         multiplyDrops(e.getDrops(), e.getEntity(), e.getEntity().getKiller(), st.amountMap.get(ea.getUniqueId()));
-                        st.getLogger().info(e.getDrops().size() + ", " + (ea != null) + ", " + e.getEntity().getKiller().getName() + " ," + st.amountMap.get(ea.getUniqueId()));
                     }else{
                         multiplyDrops(e.getDrops(), e.getEntity(), e.getEntity().getKiller(), n);
-                        st.getLogger().info(e.getDrops().size() + ", " + (ea != null) + ", " + e.getEntity().getKiller().getName() + " ," + st.amountMap.get(ea.getUniqueId()));
                         int before = st.amountMap.get(e.getEntity().getUniqueId());
                         EntityUtils eu = new EntityUtils(st);
                         Entity es = eu.createEntity(ea, true, true);
@@ -80,8 +77,8 @@ public class DeathEvent implements Listener {
     public void multiplyDrops(List<ItemStack> drops, Entity ea, Player killer, int mobAmount){
         for(ItemStack is : drops){
             if(config.getFilecon().getBoolean("creature.kill-all.drops.blacklist-enabled")){
-                for(String s : config.getFilecon().getConfigurationSection("creature.kill-all.drops.blacklist").getKeys(false)){
-
+                if(config.getFilecon().getStringList("creature.kill-all.drops.blacklist").contains(is.getType().toString())){
+                    continue;
                 }
             }
             if(config.getFilecon().getBoolean("creature.kill-all.drops.ignore-armor")){
