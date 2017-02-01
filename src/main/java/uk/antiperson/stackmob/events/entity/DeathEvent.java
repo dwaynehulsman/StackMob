@@ -1,19 +1,20 @@
 package uk.antiperson.stackmob.events.entity;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import uk.antiperson.stackmob.Configuration;
-import uk.antiperson.stackmob.utils.EntityUtils;
 import uk.antiperson.stackmob.StackMob;
+import uk.antiperson.stackmob.utils.EntityUtils;
 
 import java.util.List;
 import java.util.Random;
@@ -76,6 +77,11 @@ public class DeathEvent implements Listener {
 
     public void multiplyDrops(List<ItemStack> drops, Entity ea, Player killer, int mobAmount){
         for(ItemStack is : drops){
+            if (ea instanceof Zombie) {
+                if (config.getFilecon().getBoolean("creature.kill-all.drops.zombie-whitelist-enabled")) {
+                    if (!is.getType().equals(Material.ROTTEN_FLESH)) continue;
+                }
+            }
             if(config.getFilecon().getBoolean("creature.kill-all.drops.blacklist-enabled")){
                 if(config.getFilecon().getStringList("creature.kill-all.drops.blacklist").contains(is.getType().toString())){
                     continue;

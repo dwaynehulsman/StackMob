@@ -7,7 +7,6 @@ import org.bukkit.entity.LivingEntity;
 import uk.antiperson.stackmob.StackMob;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 

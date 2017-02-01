@@ -79,10 +79,10 @@
             <id>sk89q-repo</id>
             <url>http://maven.sk89q.com/repo/</url>
         </repository>
-        <repository>
+        <!-- <repository>
             <id>local-maven-repo</id>
             <url>file:///${project.basedir}/jars</url>
-        </repository>
+        </repository> -->
         <repository>
             <id>Plugin Metrics</id>
             <url>http://repo.mcstats.org/content/repositories/public</url>

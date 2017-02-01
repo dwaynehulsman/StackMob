@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.logging.Level;
 
 /**
@@ -67,7 +68,8 @@ public class Configuration {
         filecon.set("creature.kill-all.enabled", false);
         filecon.set("creature.kill-all.drops.multiply", true);
         filecon.set("creature.kill-all.drops.blacklist-enabled", true);
-        filecon.set("creature.kill-all.drops.blacklist", Arrays.asList("IRON_CHESTPLATE"));
+        filecon.set("creature.kill-all.drops.blacklist", Collections.singletonList("IRON_CHESTPLATE"));
+        filecon.set("creature.kill-all.drops.zombie-whitelist-enabled", true);
         filecon.set("creature.kill-all.drops.ignore-armor", true);
         filecon.set("creature.kill-all.drops.chances-enabled", true);
         filecon.set("creature.kill-all.drops.chance.IRON_CHESTPLATE", 0.5);
@@ -88,20 +90,20 @@ public class Configuration {
         filecon.set("creature.whitelist.enabled", false);
         filecon.set("creature.whitelist.list", Arrays.asList("COW", "SHEEP", "PIG"));
         filecon.set("creature.worlds.enabled", false);
-        filecon.set("creature.worlds.list", Arrays.asList("world"));
+        filecon.set("creature.worlds.list", Collections.singletonList("world"));
         filecon.set("creature.spawnreasons.enabled", false);
-        filecon.set("creature.spawnreasons.list", Arrays.asList("SPAWNER"));
+        filecon.set("creature.spawnreasons.list", Collections.singletonList("SPAWNER"));
         filecon.set("creature.special.pig.maxstack", 25);
         filecon.set("creature.special.pig.displaytag", "&b%amount%&6 of the amazing %entity%");
         filecon.set("creature.special.pig.stackbackwards", false);
         filecon.set("worldguard.enabled", false);
-        filecon.set("worldguard.regions", Arrays.asList("__global__"));
+        filecon.set("worldguard.regions", Collections.singletonList("__global__"));
         filecon.set("worldguard.blacklist.enabled", false);
-        filecon.set("worldguard.blacklist.regions", Arrays.asList("__global__"));
+        filecon.set("worldguard.blacklist.regions", Collections.singletonList("__global__"));
         filecon.set("mythicmobs.enabled", false);
         filecon.set("mcmmo.disable-xp", false);
         filecon.set("mcmmo.use-whitelist", false);
-        filecon.set("mcmmo.whitelist", Arrays.asList("CREEPER"));
+        filecon.set("mcmmo.whitelist", Collections.singletonList("CREEPER"));
         try{
             filecon.save(file);
         }catch (IOException e){
@@ -142,7 +144,7 @@ public class Configuration {
             filecon.set("creature.sheep.stacksamecolor", filecon.getBoolean("creature.sheepsamecolor"));
             filecon.set("creature.sheep.divideondye", true);
             filecon.set("worldguard.enabled", true);
-            filecon.set("worldguard.regions", Arrays.asList("__global__"));
+            filecon.set("worldguard.regions", Collections.singletonList("__global__"));
         }
         if(!filecon.isBoolean("creature.whitelist.enabled")){
             updated = true;
@@ -166,13 +168,13 @@ public class Configuration {
         if(!filecon.isBoolean("creature.sheep.shearall")){
             updated = true;
             filecon.set("creature.worlds.enabled", true);
-            filecon.set("creature.worlds.list", Arrays.asList("world"));
+            filecon.set("creature.worlds.list", Collections.singletonList("world"));
             filecon.set("creature.sheep.shearall", false);
             filecon.set("creature.tag.text", filecon.getString("creature.tag.text").replace("%amount%", "%amount%x"));
             filecon.set("creature.spawnreasons.enabled", false);
-            filecon.set("creature.spawnreasons.list", Arrays.asList("SPAWNER"));
+            filecon.set("creature.spawnreasons.list", Collections.singletonList("SPAWNER"));
             filecon.set("worldguard.blacklist.enabled", false);
-            filecon.set("worldguard.blacklist.regions", Arrays.asList("__global__"));
+            filecon.set("worldguard.blacklist.regions", Collections.singletonList("__global__"));
         }
         if(!filecon.isBoolean("creature.horses.stacksametype")){
                 updated = true;
@@ -222,7 +224,7 @@ public class Configuration {
             updated = true;
             filecon.set("mcmmo.disable-xp", false);
             filecon.set("mcmmo.use-whitelist", false);
-            filecon.set("mcmmo.whitelist", Arrays.asList("CREEPER"));
+            filecon.set("mcmmo.whitelist", Collections.singletonList("CREEPER"));
         }
         if(!filecon.isBoolean("creature.no-targeting")){
             updated = true;
@@ -234,7 +236,7 @@ public class Configuration {
             filecon.set("creature.kill-all.drops.chances-enabled", true);
             filecon.set("creature.kill-all.drops.multiply", true);
             filecon.set("creature.kill-all.drops.blacklist-enabled", true);
-            filecon.set("creature.kill-all.drops.blacklist", Arrays.asList("IRON_CHESTPLATE"));
+            filecon.set("creature.kill-all.drops.blacklist", Collections.singletonList("IRON_CHESTPLATE"));
             filecon.set("creature.kill-all.drops.ignore-armor", true);
             filecon.set("creature.kill-all.drops.chance.IRON_CHESTPLATE", 0.5);
             filecon.set("creature.kill-all.drops.chance.CARROT", 0.5);

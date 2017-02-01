@@ -2,7 +2,6 @@ package uk.antiperson.stackmob.events.entity;
 
 import net.elseland.xikage.MythicMobs.Mobs.ActiveMob;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
