@@ -78,7 +78,7 @@ public class DeathEvent implements Listener {
     public void multiplyDrops(List<ItemStack> drops, Entity ea, Player killer, int mobAmount){
         for(ItemStack is : drops){
             if (ea instanceof Zombie) {
-                if (config.getFilecon().getBoolean("creature.kill-all.drops.zombie-whitelist-enabled")) {
+                if (config.getFilecon().getBoolean("creature.kill-all.drops.zombie-only-multiply-rottenflash")) {
                     if (!is.getType().equals(Material.ROTTEN_FLESH)) continue;
                 }
             }

@@ -69,7 +69,7 @@ public class Configuration {
         filecon.set("creature.kill-all.drops.multiply", true);
         filecon.set("creature.kill-all.drops.blacklist-enabled", true);
         filecon.set("creature.kill-all.drops.blacklist", Collections.singletonList("IRON_CHESTPLATE"));
-        filecon.set("creature.kill-all.drops.zombie-whitelist-enabled", true);
+        filecon.set("creature.kill-all.drops.zombie-only-multiply-rottenflash", true);
         filecon.set("creature.kill-all.drops.ignore-armor", true);
         filecon.set("creature.kill-all.drops.chances-enabled", true);
         filecon.set("creature.kill-all.drops.chance.IRON_CHESTPLATE", 0.5);
