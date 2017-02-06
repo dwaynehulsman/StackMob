@@ -1,15 +1,21 @@
 package uk.antiperson.stackmob.events;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import uk.antiperson.stackmob.Configuration;
 import uk.antiperson.stackmob.utils.EntityUtils;
 import uk.antiperson.stackmob.StackMob;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by nathat on 10/10/16.
@@ -18,6 +24,7 @@ public class PlayerInteractEntityEvent implements Listener {
 
     private StackMob sm;
     private Configuration config;
+    private String pluginTag = ChatColor.DARK_PURPLE + "[" + ChatColor.AQUA + "StackMob" + ChatColor.DARK_PURPLE + "] ";
     public PlayerInteractEntityEvent(StackMob sm){
         this.sm = sm;
         config = sm.config;
@@ -59,6 +66,46 @@ public class PlayerInteractEntityEvent implements Listener {
                                 sm.noStack.add(ea.getUniqueId());
                             }
                         }
+                    }
+                }
+            }else if(m == Material.STICK && itemStackVersionCorrect(e.getPlayer().getInventory()).getItemMeta() != null){
+                if(ChatColor.stripColor(itemStackVersionCorrect(e.getPlayer().getInventory()).getItemMeta().getDisplayName()).equalsIgnoreCase("The wand of stacked monsters.")){
+                    if(e.getPlayer().hasPermission("stackmob.admin") || e.getPlayer().hasPermission("stackmob.*")){
+                        if(sm.amountMap.containsKey(e.getRightClicked().getUniqueId())){
+                            Inventory inv = Bukkit.createInventory(null, 9, ChatColor.GOLD + "Stack information:");
+
+                            // Monster information
+                            ItemStack is1 = new ItemStack(Material.BOOK, 1);
+                            ItemMeta im = is1.getItemMeta();
+                            im.setDisplayName(ChatColor.AQUA + "Monster information");
+                            ArrayList<String> lore = new ArrayList<String>();
+                            lore.add(ChatColor.GOLD + "Entity Type: " + ChatColor.YELLOW + e.getRightClicked().getType().toString());
+                            lore.add(ChatColor.GOLD + "UUID: " + ChatColor.YELLOW + e.getRightClicked().getUniqueId());
+                            lore.add(" ");
+                            lore.add(ChatColor.GOLD + "Stack size: " + ChatColor.YELLOW + sm.amountMap.get(e.getRightClicked().getUniqueId()));
+                            im.setLore(lore);
+                            is1.setItemMeta(im);
+                            // Remove from StackMob database.
+                            ItemStack is2 = new ItemStack(Material.BARRIER, 1);
+                            ItemMeta im2 = is2.getItemMeta();
+                            im2.setDisplayName(ChatColor.RED + "Remove from database.");
+                            is2.setItemMeta(im2);
+                            // Kill and remove
+                            ItemStack is3 = new ItemStack(Material.DIAMOND_SWORD, 1);
+                            ItemMeta im3 = is3.getItemMeta();
+                            im3.setDisplayName(ChatColor.RED + "Remove from database and existence.");
+                            is3.setItemMeta(im3);
+
+                            inv.setItem(0, is1);
+                            inv.setItem(8, is2);
+                            inv.setItem(7, is3);
+                            e.getPlayer().openInventory(inv);
+                            sm.playerToMob.put(e.getPlayer().getUniqueId(), e.getRightClicked().getUniqueId());
+                        }else{
+                            e.getPlayer().sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Not an entity in the StackMob database!");
+                        }
+                    }else{
+                        e.getPlayer().sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have permission to do this!");
                     }
                 }
             }

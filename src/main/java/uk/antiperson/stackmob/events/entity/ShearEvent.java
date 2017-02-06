@@ -31,6 +31,7 @@ public class ShearEvent implements Listener {
     public void onShear(PlayerShearEntityEvent e){
         if(sm.amountMap.containsKey(e.getEntity().getUniqueId())) {
             if (sm.amountMap.get(e.getEntity().getUniqueId()) > 1) {
+                EntityUtils eu = new EntityUtils(sm);
                 LivingEntity ea = (LivingEntity) e.getEntity();
                 if(ea instanceof Sheep && config.getFilecon().getBoolean("creature.sheep.shearall")){
                     Wool dye = new Wool();
@@ -38,14 +39,15 @@ public class ShearEvent implements Listener {
                     ItemStack is = dye.toItemStack((int) generateRandom(sm.amountMap.get(ea.getUniqueId())));
                     ea.getWorld().dropItemNaturally(ea.getLocation(), is);
                 }else if (ea instanceof Sheep && config.getFilecon().getBoolean("creature.sheep.divideonshear")) {
-                    LivingEntity le = (LivingEntity) ea.getWorld().spawnEntity(ea.getLocation(), ea.getType());
-                    ((Sheep) le).setColor(((Sheep) ea).getColor());
-                    sm.amountMap.put(le.getUniqueId(), (sm.amountMap.get(ea.getUniqueId()) - 1));
+                    LivingEntity le = (LivingEntity) eu.createEntity(ea,false,true);
+                    ((Sheep)le).setSheared(false);
+                    sm.amountMap.put(le.getUniqueId(), sm.amountMap.get(ea.getUniqueId()) - 1);
                     sm.amountMap.put(ea.getUniqueId(), 1);
+                    sm.noStack.add(le.getUniqueId());
                 } else if (ea instanceof MushroomCow){
-                    EntityUtils eu = new EntityUtils(sm);
                     LivingEntity le = (LivingEntity) eu.createEntity(ea, false, true);
                     sm.amountMap.put(le.getUniqueId(), (sm.amountMap.get(ea.getUniqueId()) - 1));
+                    sm.noStack.add(le.getUniqueId());
                 }
             }
         }

@@ -31,6 +31,7 @@ public class StackMob extends JavaPlugin {
     public HashMap<UUID, Integer> amountMap = new HashMap<UUID, Integer>();
     public HashSet<UUID> fertile = new HashSet<UUID>();
     public HashSet<UUID> noStack = new HashSet<UUID>();
+    public HashMap<UUID, UUID> playerToMob = new HashMap<UUID, UUID>();
     public Configuration config;
 
     public boolean firstTime = false;
@@ -91,6 +92,7 @@ public class StackMob extends JavaPlugin {
         }
         getServer().getPluginManager().registerEvents(new ShearEvent(this), this);
         getServer().getPluginManager().registerEvents(new JoinEvent(this), this);
+        getServer().getPluginManager().registerEvents(new InvEvent(this), this);
         getCommand("sm").setExecutor(new Commands(this));
         getLogger().log(Level.INFO, "Registered all commands and events!");
         if(getServer().getVersion().contains("1.8")){

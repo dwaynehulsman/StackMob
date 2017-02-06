@@ -2,6 +2,7 @@ package uk.antiperson.stackmob;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,9 +11,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import uk.antiperson.stackmob.utils.EntityUtils;
 import uk.antiperson.stackmob.utils.Updater;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -40,7 +44,7 @@ public class Commands implements CommandExecutor{
                     p.sendMessage(ChatColor.YELLOW + "/sm remove [x] [y] [z]" + div + ChatColor.GOLD + "Removes all stacked entities in a radius around you.");
                     p.sendMessage(ChatColor.YELLOW + "/sm unstack [x] [y] [z]" + div + ChatColor.GOLD + "Unstacks all stacked entities in a radius around you.");
                     p.sendMessage(ChatColor.YELLOW + "/sm stats" + div + ChatColor.GOLD + "Shows details about all the currently stacked mobs.");
-                    p.sendMessage(ChatColor.YELLOW + "/sm reset" + div + ChatColor.GOLD + "Resets the config file to default values.");
+                    p.sendMessage(ChatColor.YELLOW + "/sm wand" + div + ChatColor.GOLD + "Gives you the wand of stacked mobs.");
                     p.sendMessage(ChatColor.YELLOW + "Page 1/2 of command help. Type /sm 2 for next page.");
                 }else{
                     p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
@@ -49,6 +53,7 @@ public class Commands implements CommandExecutor{
                 if(args[0].equalsIgnoreCase("2")){
                     if(p.hasPermission("stackmob.listcommands") || p.hasPermission("stackmob.*")) {
                         p.sendMessage(beforeBig);
+                        p.sendMessage(ChatColor.YELLOW + "/sm reset" + div + ChatColor.GOLD + "Resets the config file to default values.");
                         p.sendMessage(ChatColor.YELLOW + "/sm reload" + div + ChatColor.GOLD + "Reloads configuration values into memory.");
                         p.sendMessage(ChatColor.YELLOW + "/sm update" + div + ChatColor.GOLD + "Checks SpigotMC for plugin updates.");
                         p.sendMessage(ChatColor.YELLOW + "/sm about" + div + ChatColor.GOLD + "Shows information about this plugin.");
@@ -110,6 +115,18 @@ public class Commands implements CommandExecutor{
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
                         m.config.reloadConfig();
                         p.sendMessage(pluginTag + ChatColor.GREEN + "The configuration has been reloaded successfully!");
+                    }else{
+                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                    }
+                }else if(args[0].equalsIgnoreCase("wand")){
+                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                        ItemStack is = new ItemStack(Material.STICK, 1);
+                        ItemMeta im = is.getItemMeta();
+                        im.setDisplayName(ChatColor.AQUA + "The wand of stacked monsters.");
+                        im.setLore(Arrays.asList(ChatColor.YELLOW + "The wand that can do anything to a stacked monster.", " ", ChatColor.YELLOW + "Right click on any entity to view information."));
+                        is.setItemMeta(im);
+                        p.getInventory().addItem(is);
+                        p.sendMessage(pluginTag + ChatColor.GREEN + "The wand has been added to your inventory.");
                     }else{
                         p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
                     }
