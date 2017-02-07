@@ -3,7 +3,6 @@ package uk.antiperson.stackmob.plugins;
 import net.elseland.xikage.MythicMobs.API.Exceptions.InvalidMobTypeException;
 import net.elseland.xikage.MythicMobs.API.IMobsAPI;
 import net.elseland.xikage.MythicMobs.Mobs.ActiveMob;
-import net.elseland.xikage.MythicMobs.Mobs.MythicMob;
 import org.bukkit.entity.Entity;
 import uk.antiperson.stackmob.StackMob;
 
