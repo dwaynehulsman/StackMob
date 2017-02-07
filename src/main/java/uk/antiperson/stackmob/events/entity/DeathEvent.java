@@ -2,6 +2,7 @@ package uk.antiperson.stackmob.events.entity;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -107,6 +108,11 @@ public class DeathEvent implements Listener {
     public List<ItemStack> multiplyDrops(List<ItemStack> drops, Entity ea, Player killer, int mobAmount){
         List<ItemStack> isl = new ArrayList<ItemStack>();
         for(ItemStack is : drops){
+            if (ea instanceof Zombie) {
+                if (config.getFilecon().getBoolean("creature.kill-all.drops.zombie-only-multiply-rottenflash")) {
+                   if (!is.getType().equals(Material.ROTTEN_FLESH)) continue;
+                }
+            }
             st.getLogger().info(is.getType().toString());
             if(config.getFilecon().getBoolean("creature.kill-all.drops.blacklist-enabled")){
                 if(config.getFilecon().getStringList("creature.kill-all.drops.blacklist").contains(is.getType().toString())){

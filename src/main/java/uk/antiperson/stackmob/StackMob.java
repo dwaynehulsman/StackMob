@@ -6,7 +6,6 @@ import org.bukkit.DyeColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 import org.mcstats.Metrics;
 import uk.antiperson.stackmob.api.StackMobAPI;
 import uk.antiperson.stackmob.events.*;

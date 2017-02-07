@@ -1,11 +1,8 @@
 package uk.antiperson.stackmob.events.entity;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import uk.antiperson.stackmob.Configuration;
 import uk.antiperson.stackmob.StackMob;
 

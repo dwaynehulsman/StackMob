@@ -1,7 +1,6 @@
 package uk.antiperson.stackmob.tasks;
 
 import net.elseland.xikage.MythicMobs.Mobs.ActiveMob;
-import org.apache.commons.lang3.text.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
