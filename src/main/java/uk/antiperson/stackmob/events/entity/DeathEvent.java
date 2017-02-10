@@ -95,11 +95,13 @@ public class DeathEvent implements Listener {
                     eu.createEntity(ea, true, true);
                     StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
                             true, 1, e.getEntity().getKiller(), e.getDroppedExp(), e.getDrops());
+                    Bukkit.getPluginManager().callEvent(sde);
                 }
             }else{
                 st.amountMap.remove(e.getEntity().getUniqueId());
                 StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
                         true,  1, e.getEntity().getKiller(), e.getDroppedExp(), e.getDrops());
+                Bukkit.getPluginManager().callEvent(sde);
             }
         }
     }
@@ -128,7 +130,6 @@ public class DeathEvent implements Listener {
             }
             if(config.getFilecon().getBoolean("creature.kill-all.drops.chances-enabled")) {
                 if(config.getFilecon().getConfigurationSection("creature.kill-all.drops.chance").getKeys(false).contains(is.getType().toString())) {
-                    st.getLogger().info("hmm");
                     for (int i = 1; i <= mobAmount; i++) {
                         double d = Math.random();
                         if (d < config.getFilecon().getDouble("creature.kill-all.drops.chance")) {

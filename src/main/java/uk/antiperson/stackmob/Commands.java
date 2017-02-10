@@ -56,6 +56,7 @@ public class Commands implements CommandExecutor{
                         p.sendMessage(ChatColor.YELLOW + "/sm reset" + div + ChatColor.GOLD + "Resets the config file to default values.");
                         p.sendMessage(ChatColor.YELLOW + "/sm reload" + div + ChatColor.GOLD + "Reloads configuration values into memory.");
                         p.sendMessage(ChatColor.YELLOW + "/sm update" + div + ChatColor.GOLD + "Checks SpigotMC for plugin updates.");
+                        p.sendMessage(ChatColor.YELLOW + "/sm download" + div + ChatColor.GOLD + "Downloads the latest version.");
                         p.sendMessage(ChatColor.YELLOW + "/sm about" + div + ChatColor.GOLD + "Shows information about this plugin.");
                         p.sendMessage(ChatColor.YELLOW + "Page 2/2 of command help.");
                     }else{
@@ -130,10 +131,25 @@ public class Commands implements CommandExecutor{
                     }else{
                         p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
                     }
-                }else{
+                }else if(args[0].equalsIgnoreCase("download")){
+                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                        Updater up = new Updater(m);
+                        p.sendMessage(pluginTag + ChatColor.GREEN + "Downloading latest update from spigotmc.org...");
+                        try{
+                            up.downloadUpdate();
+                            p.sendMessage(pluginTag + ChatColor.GREEN + "Downloaded the latest file! Make sure to restart your sever for this to take effect!");
+                        }catch (Exception e){
+                            p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Something went wrong while trying to do that, check console for more details.");
+                            e.printStackTrace();
+                        }
+
+                    }else{
+                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                    }
+                }else {
                     p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
                 }
-            }else if(args.length == 2){
+                }else if(args.length == 2){
                 if(args[0].equalsIgnoreCase("remove")  && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
                     p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm remove [x] [y] [z]");
                 }else if(args[0].equalsIgnoreCase("unstack")  && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){

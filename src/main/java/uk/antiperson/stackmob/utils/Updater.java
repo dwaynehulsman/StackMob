@@ -1,13 +1,16 @@
 package uk.antiperson.stackmob.utils;
 
+import org.apache.commons.io.FileUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import uk.antiperson.stackmob.StackMob;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.logging.Level;
 
 /**
@@ -37,8 +40,10 @@ public class Updater{
                     if (!m.getDescription().getVersion().equals(version.replace("v", ""))) {
                         if(isPlayer) {
                             p.sendMessage(pluginTag + ChatColor.GREEN + "You are currently on v" + m.getDescription().getVersion() + " and a new version, " + version + " is available.");
+                            p.sendMessage(pluginTag + ChatColor.GREEN + "Make sure to run '/sm download' to get the latest version.");
                         }else{
                             m.getLogger().log(Level.INFO, "You are currently on v" + m.getDescription().getVersion() + ", and a new version, " + version + " is available!");
+                            m.getLogger().log(Level.INFO, "Make sure to run '/sm download' to get the latest version.");
                         }
                     }else{
                         if(isPlayer) {
@@ -47,6 +52,7 @@ public class Updater{
                             m.getLogger().log(Level.INFO, "No new updates for StackMob have been found!");
                         }
                     }
+
                 } catch (Exception e) {
                     if(isPlayer) {
                         p.sendMessage(pluginTag + ChatColor.RED + "Unable to contact spigot, is your server offline?");
@@ -56,5 +62,10 @@ public class Updater{
                 }
             }
         });
+    }
+
+    public void downloadUpdate() throws Exception{
+        FileUtils.copyURLToFile(new URL("https://api.spiget.org/v2/resources/29999/download"),
+                new File(m.getDataFolder().getParent() + File.separator + m.getServer().getUpdateFolder(), "StackMob.jar"));
     }
 }

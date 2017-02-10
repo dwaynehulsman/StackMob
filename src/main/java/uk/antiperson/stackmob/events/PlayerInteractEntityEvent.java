@@ -68,8 +68,10 @@ public class PlayerInteractEntityEvent implements Listener {
                         }
                     }
                 }
-            }else if(m == Material.STICK && itemStackVersionCorrect(e.getPlayer().getInventory()).getItemMeta() != null){
-                if(ChatColor.stripColor(itemStackVersionCorrect(e.getPlayer().getInventory()).getItemMeta().getDisplayName()).equalsIgnoreCase("The wand of stacked monsters.")){
+            }else if(m == Material.STICK && itemStackVersionCorrect(e.getPlayer().getInventory()).getItemMeta() != null
+                    && itemStackVersionCorrect(e.getPlayer().getInventory()).getItemMeta().getDisplayName() != null){
+                if(ChatColor.stripColor(itemStackVersionCorrect(e.getPlayer().getInventory()).getItemMeta().getDisplayName()).
+                        equalsIgnoreCase("The wand of stacked monsters.")){
                     if(e.getPlayer().hasPermission("stackmob.admin") || e.getPlayer().hasPermission("stackmob.*")){
                         if(sm.amountMap.containsKey(e.getRightClicked().getUniqueId())){
                             Inventory inv = Bukkit.createInventory(null, 9, ChatColor.GOLD + "Stack information:");
