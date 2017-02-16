@@ -24,7 +24,8 @@ public class StackDeathEvent extends Event implements Cancellable {
     private int step;
     private HumanEntity he;
     private int xp;
-    public StackDeathEvent(StackedEntity se, boolean killAll, boolean killStep, int step, HumanEntity killer, int xp, List<ItemStack> drops){
+    private StackedEntity newEntity;
+    public StackDeathEvent(StackedEntity se, boolean killAll, boolean killStep, int step, HumanEntity killer, int xp, List<ItemStack> drops, StackedEntity newEntity){
         this.se = se;
         this.killAll = killAll;
         this.killStep = killStep;
@@ -32,17 +33,22 @@ public class StackDeathEvent extends Event implements Cancellable {
         this.he = killer;
         this.xp = xp;
         this.drops = drops;
+        this.newEntity = newEntity;
     }
 
     public StackedEntity getStackedEntity(){
         return se;
     }
 
-    public boolean isKillAllEnabled(){
+    public StackedEntity getNewEntity(){
+        return newEntity;
+    }
+
+    public boolean isKillAll(){
         return killAll;
     }
 
-    public boolean isKillStepEnabled(){
+    public boolean isKillStep(){
         return killStep;
     }
 

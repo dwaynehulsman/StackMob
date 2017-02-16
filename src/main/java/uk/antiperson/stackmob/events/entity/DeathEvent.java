@@ -34,7 +34,7 @@ public class DeathEvent implements Listener {
         this.st = st;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onDeath(EntityDeathEvent e){
         boolean killAll = config.getFilecon().getBoolean("creature.kill-all.enabled");
         if(st.amountMap.containsKey(e.getEntity().getUniqueId())){
@@ -54,7 +54,7 @@ public class DeathEvent implements Listener {
                         st.amountMap.remove(ea.getUniqueId());
                     }
                     StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), true,
-                            false, 1, e.getEntity().getKiller(), e.getDroppedExp(), isl);
+                            false, 1, e.getEntity().getKiller(), e.getDroppedExp(), isl, null);
                     Bukkit.getPluginManager().callEvent(sde);
                     if(sde.isCancelled()){
                         return;
@@ -69,17 +69,18 @@ public class DeathEvent implements Listener {
                     List<ItemStack> isl = e.getDrops();
                     int diff = config.getFilecon().getInt("creature.kill-step.max") - config.getFilecon().getInt("creature.kill-step.min");
                     int n = config.getFilecon().getInt("creature.kill-step-min") + new Random().nextInt(diff) + 1;
+                    Entity es = null;
                     if(st.amountMap.get(ea.getUniqueId()) <= n){
                         isl.addAll(multiplyDrops(e.getDrops(), e.getEntity(), e.getEntity().getKiller(), st.amountMap.get(ea.getUniqueId())));
                     }else{
                         isl.addAll(multiplyDrops(e.getDrops(), e.getEntity(), e.getEntity().getKiller(), n));
                         int before = st.amountMap.get(e.getEntity().getUniqueId());
                         EntityUtils eu = new EntityUtils(st);
-                        Entity es = eu.createEntity(ea, true, true);
+                        es = eu.createEntity(ea, true, true);
                         st.amountMap.put(es.getUniqueId(), before - n);
                     }
                     StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
-                            true, n, e.getEntity().getKiller(), e.getDroppedExp(), isl);
+                            true, n, e.getEntity().getKiller(), e.getDroppedExp(), isl, st.getAPI().getEntityManager().getStackedEntity(es));
                     Bukkit.getPluginManager().callEvent(sde);
                     if(sde.isCancelled()){
                         return;
@@ -92,20 +93,21 @@ public class DeathEvent implements Listener {
                     }
                 }else{
                     EntityUtils eu = new EntityUtils(st);
-                    eu.createEntity(ea, true, true);
+                    Entity es = eu.createEntity(ea, true, true);
                     StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
-                            true, 1, e.getEntity().getKiller(), e.getDroppedExp(), e.getDrops());
+                            true, 1, e.getEntity().getKiller(), e.getDroppedExp(), e.getDrops(), st.getAPI().getEntityManager().getStackedEntity(es));
                     Bukkit.getPluginManager().callEvent(sde);
                 }
             }else{
                 st.amountMap.remove(e.getEntity().getUniqueId());
                 StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
-                        true,  1, e.getEntity().getKiller(), e.getDroppedExp(), e.getDrops());
+                        true,  1, e.getEntity().getKiller(), e.getDroppedExp(), e.getDrops(), null);
                 Bukkit.getPluginManager().callEvent(sde);
             }
         }
     }
 
+    
 
     public List<ItemStack> multiplyDrops(List<ItemStack> drops, Entity ea, Player killer, int mobAmount){
         List<ItemStack> isl = new ArrayList<ItemStack>();
@@ -115,7 +117,6 @@ public class DeathEvent implements Listener {
                    if (!is.getType().equals(Material.ROTTEN_FLESH)) continue;
                 }
             }
-            st.getLogger().info(is.getType().toString());
             if(config.getFilecon().getBoolean("creature.kill-all.drops.blacklist-enabled")){
                 if(config.getFilecon().getStringList("creature.kill-all.drops.blacklist").contains(is.getType().toString())){
                     continue;

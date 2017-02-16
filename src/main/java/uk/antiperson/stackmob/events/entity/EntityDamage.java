@@ -23,7 +23,7 @@ public class EntityDamage implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageByEntityEvent e){
-        if(sm.amountMap.containsKey(e.getDamager().getUniqueId())){
+        if(sm.amountMap.containsKey(e.getDamager())){
             double max = config.getFilecon().getDouble("creature.all-damage.max");
             double min = config.getFilecon().getDouble("creature.all-damage.min");
             double newDamage = r.nextInt(sm.amountMap.get(e.getDamager().getUniqueId())) * (e.getDamage() * myRandom(min, max));

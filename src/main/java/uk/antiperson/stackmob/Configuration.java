@@ -96,6 +96,7 @@ public class Configuration {
         filecon.set("creature.special.pig.maxstack", 25);
         filecon.set("creature.special.pig.displaytag", "&b%amount%&6 of the amazing %entity%");
         filecon.set("creature.special.pig.stackbackwards", false);
+        filecon.set("creature.update-metadata", true);
         filecon.set("worldguard.enabled", false);
         filecon.set("worldguard.regions", Collections.singletonList("__global__"));
         filecon.set("worldguard.blacklist.enabled", false);
@@ -244,6 +245,11 @@ public class Configuration {
             filecon.set("creature.all-damage.min", 0.2);
             filecon.set("creature.all-damage.max", 0.4);
             filecon.set("creature.no-targeting", false);
+        }
+        if(!filecon.isBoolean("creature.update-metadata")){
+            updated = true;
+            filecon.set("creature.update-metadata", true);
+            filecon.set("creature.kill-all.drops.zombie-only-multiply-rottenflash", true);
         }
         if(updated){
             m.getLogger().log(Level.INFO, "Updating your configuration file to the latest version...");

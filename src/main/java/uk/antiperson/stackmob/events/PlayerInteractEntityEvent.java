@@ -61,9 +61,17 @@ public class PlayerInteractEntityEvent implements Listener {
                                 EntityUtils eu = new EntityUtils(sm);
                                 Entity ea = eu.createEntity(e.getRightClicked(), false, false);
                                 sm.amountMap.put(ea.getUniqueId(), sm.amountMap.get(e.getRightClicked().getUniqueId()) - 1);
-                                sm.amountMap.put(e.getRightClicked().getUniqueId(), 1);
                                 sm.mobUuids.add(e.getRightClicked().getUniqueId());
                                 sm.noStack.add(ea.getUniqueId());
+                                final Entity eas = e.getRightClicked();
+                                sm.getServer().getScheduler().runTaskLater(sm, new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if(!eas.isDead()){
+                                            sm.amountMap.put(eas.getUniqueId(), 1);
+                                        }
+                                    }
+                                }, 20 * 60);
                             }
                         }
                     }

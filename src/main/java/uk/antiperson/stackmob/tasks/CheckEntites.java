@@ -62,10 +62,7 @@ public class CheckEntites extends BukkitRunnable {
                 }
             }
             for (LivingEntity e : w.getLivingEntities()) {
-                if(sm.fertile.contains(e.getUniqueId())){
-                    continue;
-                }
-                if (checks(e)) {
+                if(!sm.amountMap.containsKey(e.getUniqueId())){
                     continue;
                 }
                 if(sm.isLegacy()){
@@ -86,14 +83,11 @@ public class CheckEntites extends BukkitRunnable {
                         continue;
                     }
                 }
-                if(!sm.amountMap.containsKey(e.getUniqueId())){
+                if (checks(e)) {
                     continue;
                 }
                 for (Entity le : e.getNearbyEntities(x, y, z)) {
                     if (le instanceof LivingEntity && sm.amountMap.containsKey(le.getUniqueId())) {
-                        if(sm.fertile.contains(le.getUniqueId())){
-                            continue;
-                        }
                         if (!checks((LivingEntity) le)) {
                             if (e.getType() == le.getType()) {
                                 if (sheepSameColor && le instanceof Sheep) {

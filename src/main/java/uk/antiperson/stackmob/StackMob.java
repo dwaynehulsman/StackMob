@@ -12,6 +12,7 @@ import uk.antiperson.stackmob.events.*;
 import uk.antiperson.stackmob.events.entity.*;
 import uk.antiperson.stackmob.plugins.WorldGuard;
 import uk.antiperson.stackmob.tasks.CheckEntites;
+import uk.antiperson.stackmob.tasks.MetadataUpdater;
 import uk.antiperson.stackmob.tasks.TagUpdater;
 import uk.antiperson.stackmob.utils.CreatureData;
 import uk.antiperson.stackmob.utils.Updater;
@@ -25,11 +26,15 @@ import java.util.logging.Level;
  */
 public class StackMob extends JavaPlugin {
 
+    // Prevent from getting merged on the CheckEntities task.
     public HashSet<UUID> mobUuids = new HashSet<UUID>();
+    // Map of the colour that is dyed in a stack of sheep
     public HashMap<UUID, DyeColor> lastDyed = new HashMap<UUID, DyeColor>();
+    // Contains monster amounts
     public HashMap<UUID, Integer> amountMap = new HashMap<UUID, Integer>();
-    public HashSet<UUID> fertile = new HashSet<UUID>();
+    // Prevent from stacking on first spawn
     public HashSet<UUID> noStack = new HashSet<UUID>();
+    // Wand of stacked mobs map, player UUID to monster UUID
     public HashMap<UUID, UUID> playerToMob = new HashMap<UUID, UUID>();
     public Configuration config;
 
@@ -68,6 +73,9 @@ public class StackMob extends JavaPlugin {
         if(config.getFilecon().getBoolean("creature.tag.visible")) {
             new TagUpdater(this).runTaskTimer(this, 0, config.getFilecon().getLong("creature.tag.updateinterval"));
         }
+        if(config.getFilecon().getBoolean("creature.update-metadata")){
+            new MetadataUpdater(this).runTaskTimer(this, 0, 1);
+        }
         getServer().getPluginManager().registerEvents(new SpawnEvent(this), this);
         getServer().getPluginManager().registerEvents(new DeathEvent(this), this);
         if(config.getFilecon().getBoolean("creature.sheep.divideondye")) {
@@ -86,7 +94,7 @@ public class StackMob extends JavaPlugin {
         if(config.getFilecon().getBoolean("creature.kill-all.enabled") && config.getFilecon().getBoolean("creature.multiplyslimes")){
             getServer().getPluginManager().registerEvents(new SlimeDivide(this), this);
         }
-        if(config.getFilecon().getBoolean("creature.damage-all.enabled")){
+        if(config.getFilecon().getBoolean("creature.all-damage.enabled")){
             getServer().getPluginManager().registerEvents(new EntityDamage(this), this);
         }
         getServer().getPluginManager().registerEvents(new ShearEvent(this), this);

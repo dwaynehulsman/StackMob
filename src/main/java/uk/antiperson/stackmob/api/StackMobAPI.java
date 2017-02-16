@@ -1,6 +1,7 @@
 package uk.antiperson.stackmob.api;
 
 import org.bukkit.plugin.Plugin;
+import uk.antiperson.stackmob.Configuration;
 import uk.antiperson.stackmob.StackMob;
 
 /**
@@ -15,6 +16,10 @@ public class StackMobAPI {
 
     public EntityManager getEntityManager(){
         return new EntityManager(sm);
+    }
+
+    public Configuration getConfig(){
+        return sm.config;
     }
 
     public Plugin getPlugin(){

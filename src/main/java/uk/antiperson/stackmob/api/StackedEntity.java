@@ -16,7 +16,11 @@ public class StackedEntity {
     }
 
     public int getStackAmount(){
-        return sm.amountMap.get(e.getUniqueId());
+        if(sm.config.getFilecon().getBoolean("creature.update-metadata")) {
+            return e.getMetadata("stackmob:stack-size").get(0).asInt();
+        }else{
+            return sm.amountMap.get(e.getUniqueId());
+        }
     }
 
     public void setStackAmount(int stackAmount){
@@ -36,7 +40,4 @@ public class StackedEntity {
         return e;
     }
 
-    public boolean isFertile(){
-        return sm.fertile.contains(e.getUniqueId());
-    }
 }

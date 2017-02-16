@@ -25,7 +25,11 @@ public class EntityManager {
     }
 
     public boolean isStackedEntity(Entity entity){
-        return sm.amountMap.containsKey(entity.getUniqueId());
+        if(sm.config.getFilecon().getBoolean("creature.update-metadata")) {
+            return entity.hasMetadata("stackmob:stack-size");
+        }else{
+            return sm.amountMap.containsKey(entity.getUniqueId());
+        }
     }
 
     public void addNewStack(Entity entity){
