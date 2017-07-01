@@ -64,8 +64,9 @@ public class Updater{
         });
     }
 
+    // &spiget__ua=StackMob-Updater
     public void downloadUpdate() throws Exception{
         FileUtils.copyURLToFile(new URL("https://api.spiget.org/v2/resources/29999/download"),
-                new File(m.getDataFolder().getParent() + File.separator + m.getServer().getUpdateFolder(), "StackMob.jar"));
+                new File(m.getDataFolder().toString().replace("StackMob", "") + File.separator + "update", "StackMob.jar"));
     }
 }

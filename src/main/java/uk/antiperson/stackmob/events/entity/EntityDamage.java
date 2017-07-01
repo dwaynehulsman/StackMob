@@ -1,37 +1,37 @@
 package uk.antiperson.stackmob.events.entity;
 
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import uk.antiperson.stackmob.Configuration;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import uk.antiperson.stackmob.StackMob;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 /**
- * Created by nathat on 28/01/17.
+ * Created by nathat on 11/03/17.
  */
 public class EntityDamage implements Listener {
 
     private StackMob sm;
-    private Configuration config;
-    private Random r = new Random();
+    private SplittableRandom rand = new SplittableRandom();
     public EntityDamage(StackMob sm){
         this.sm = sm;
-        config = sm.config;
     }
 
     @EventHandler
-    public void onEntityDamage(EntityDamageByEntityEvent e){
-        if(sm.amountMap.containsKey(e.getDamager())){
-            double max = config.getFilecon().getDouble("creature.all-damage.max");
-            double min = config.getFilecon().getDouble("creature.all-damage.min");
-            double newDamage = r.nextInt(sm.amountMap.get(e.getDamager().getUniqueId())) * (e.getDamage() * myRandom(min, max));
-            e.setDamage(e.getDamage() + newDamage);
+    public void onEntityDamage(EntityDamageEvent e){
+        if(sm.config.getFilecon().getStringList("creature.damage-multiply.reasons").contains(e.getCause().toString())){
+            if(sm.amountMap.containsKey(e.getEntity().getUniqueId())){
+                if(sm.amountMap.get(e.getEntity().getUniqueId()) > 1){
+                    double newDamage = (e.getDamage() * sm.amountMap.get(e.getEntity().getUniqueId())) * (0.8 + rand.nextDouble(0.2));
+                    e.getEntity().setMetadata("stackmob-damage", new FixedMetadataValue(sm, newDamage));
+                    e.setDamage(newDamage);
+                }
+            }
         }
-    }
-
-    private double myRandom(double min, double max) {
-        return (r.nextInt((int)((max-min)*10+1))+min*10) / 10.0;
     }
 }

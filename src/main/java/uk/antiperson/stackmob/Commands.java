@@ -1,9 +1,6 @@
 package uk.antiperson.stackmob;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -30,28 +27,32 @@ public class Commands implements CommandExecutor{
     private String pluginTag = ChatColor.DARK_PURPLE + "[" + ChatColor.AQUA + "StackMob" + ChatColor.DARK_PURPLE + "] ";
     private String div = ChatColor.GRAY + " - ";
     private String beforeBig = ChatColor.GRAY + "------" + pluginTag.replace(" ", "") + ChatColor.GRAY + "------------------------------";
+    private String noPermission = pluginTag + ChatColor.DARK_RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!";
     public Commands(StackMob st){
         m = st;
     }
 
+
+    // You don't need to keep checking for permission, you know!
     public boolean onCommand(CommandSender sender, Command cmd, String string, String[] args){
         if(sender instanceof Player){
             Player p = (Player) sender;
             if(args.length == 0){
-                if(p.hasPermission("stackmob.listcommands") || p.hasPermission("stackmob.*")){
+                if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
                     p.sendMessage(beforeBig);
                     p.sendMessage(ChatColor.YELLOW + "/sm removeall" + div + ChatColor.GOLD + "Removes all stacked entities in loaded chunks.");
                     p.sendMessage(ChatColor.YELLOW + "/sm remove [x] [y] [z]" + div + ChatColor.GOLD + "Removes all stacked entities in a radius around you.");
                     p.sendMessage(ChatColor.YELLOW + "/sm unstack [x] [y] [z]" + div + ChatColor.GOLD + "Unstacks all stacked entities in a radius around you.");
+                    p.sendMessage(ChatColor.YELLOW + "/sm spawnstack [entity type] [stack size]" + div + ChatColor.GOLD + "Spawn an entity with a specific stack size.");
                     p.sendMessage(ChatColor.YELLOW + "/sm stats" + div + ChatColor.GOLD + "Shows details about all the currently stacked mobs.");
                     p.sendMessage(ChatColor.YELLOW + "/sm wand" + div + ChatColor.GOLD + "Gives you the wand of stacked mobs.");
                     p.sendMessage(ChatColor.YELLOW + "Page 1/2 of command help. Type /sm 2 for next page.");
                 }else{
-                    p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                    p.sendMessage(noPermission);
                 }
             }else if(args.length == 1){
                 if(args[0].equalsIgnoreCase("2")){
-                    if(p.hasPermission("stackmob.listcommands") || p.hasPermission("stackmob.*")) {
+                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         p.sendMessage(beforeBig);
                         p.sendMessage(ChatColor.YELLOW + "/sm reset" + div + ChatColor.GOLD + "Resets the config file to default values.");
                         p.sendMessage(ChatColor.YELLOW + "/sm reload" + div + ChatColor.GOLD + "Reloads configuration values into memory.");
@@ -60,29 +61,32 @@ public class Commands implements CommandExecutor{
                         p.sendMessage(ChatColor.YELLOW + "/sm about" + div + ChatColor.GOLD + "Shows information about this plugin.");
                         p.sendMessage(ChatColor.YELLOW + "Page 2/2 of command help.");
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
                     }
                 }else if(args[0].equalsIgnoreCase("about")){
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
                         p.sendMessage(beforeBig);
-                        p.sendMessage(ChatColor.YELLOW + "StackMob v" + m.getDescription().getVersion() + " by antiPerson");
+                        p.sendMessage(ChatColor.YELLOW + "StackMob v" + m.getDescription().getVersion() + " by antiPerson (known as BaconPied)");
                         p.sendMessage(ChatColor.YELLOW + "Find out more at " + m.getDescription().getWebsite());
-                        p.sendMessage(ChatColor.YELLOW + "Has this plugin benefited your server? Please leave a review - it helps a lot.");
+                        p.sendMessage(ChatColor.YELLOW + "Has this plugin benefited your server? Please leave a review, it helps a lot.");
+                        p.sendMessage(" ");
+                        p.sendMessage(ChatColor.YELLOW + "Thanks to everyone who has helped me fix bugs!");
+                        p.sendMessage(ChatColor.YELLOW + "Also, thanks to YOU for using this plugin!");
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
                     }
                 }else if(args[0].equalsIgnoreCase("update")){
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
                         Updater up = new Updater(m);
                         up.checkUpdate(true, p);
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
                     }
                 }else if(args[0].equalsIgnoreCase("removeall")){
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
                         removeAll(p);
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
                     }
                 }else if(args[0].equalsIgnoreCase("reset")){
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
@@ -92,32 +96,32 @@ public class Commands implements CommandExecutor{
                         m.config.reloadConfig();
                         p.sendMessage(pluginTag + ChatColor.GREEN + "The configuration file has been reset successfully!");
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
                     }
                 }else if(args[0].equalsIgnoreCase("stats")){
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
                         displayStats(p);
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
                     }
                 }else if(args[0].equalsIgnoreCase("remove")){
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
                         p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm remove [x] [y] [z]");
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
                     }
                 }else if(args[0].equalsIgnoreCase("unstack")){
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
                         p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm unstack [x] [y] [z]");
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
                     }
                 }else if(args[0].equalsIgnoreCase("reload")){
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
                         m.config.reloadConfig();
                         p.sendMessage(pluginTag + ChatColor.GREEN + "The configuration has been reloaded successfully!");
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
                     }
                 }else if(args[0].equalsIgnoreCase("wand")){
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
@@ -129,7 +133,7 @@ public class Commands implements CommandExecutor{
                         p.getInventory().addItem(is);
                         p.sendMessage(pluginTag + ChatColor.GREEN + "The wand has been added to your inventory.");
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
                     }
                 }else if(args[0].equalsIgnoreCase("download")){
                     if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
@@ -144,24 +148,43 @@ public class Commands implements CommandExecutor{
                         }
 
                     }else{
-                        p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!");
+                        p.sendMessage(noPermission);
+                    }
+                }else if(args[0].equalsIgnoreCase("debug")){
+                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                        m.debuggerMode = !m.debuggerMode;
+                    }else{
+                        p.sendMessage(noPermission);
+                    }
+                }else if(args[0].equalsIgnoreCase("spawnstack")){
+                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                        p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm spawnstack [entity type] [stack size]");
+                    }else{
+                        p.sendMessage(noPermission);
                     }
                 }else {
                     p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
                 }
-                }else if(args.length == 2){
-                if(args[0].equalsIgnoreCase("remove")  && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
-                    p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm remove [x] [y] [z]");
-                }else if(args[0].equalsIgnoreCase("unstack")  && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
-                    p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm unstack [x] [y] [z]");
-                }else{
-                    p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
-                }
             }else if(args.length == 3){
-                if(args[0].equalsIgnoreCase("remove") && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
-                    p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm remove [x] [y] [z]");
-                }else if(args[0].equalsIgnoreCase("unstack")  && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
-                    p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm unstack [x] [y] [z]");
+                if(args[0].equalsIgnoreCase("spawnstack")){
+                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                        boolean did = false;
+                        for(EntityType et : EntityType.values()){
+                            if(et.toString().equalsIgnoreCase(args[1])){
+                                did = true;
+                            }
+                        }
+                        if(did && Integer.valueOf(args[2]) != null){
+                            Entity e = p.getWorld().spawnEntity(p.getLocation(), EntityType.valueOf(args[1].toUpperCase()));
+                            m.noStack.add(e.getUniqueId());
+                            m.amountMap.put(e.getUniqueId(), Integer.valueOf(args[2]));
+                            p.sendMessage(pluginTag + ChatColor.GREEN + "Sucessfully spawned a " + e.getType().toString() + " with a stack size of " + args[2]);
+                        }else{
+                            p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
+                        }
+                    }else{
+                        p.sendMessage(noPermission);
+                    }
                 }else{
                     p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
                 }
@@ -183,9 +206,14 @@ public class Commands implements CommandExecutor{
                 }
 
             }else{
-                p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
+                if(args[0].equalsIgnoreCase("remove") && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
+                    p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm remove [x] [y] [z]");
+                }else if(args[0].equalsIgnoreCase("unstack")  && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
+                    p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm unstack [x] [y] [z]");
+                }else{
+                    p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
+                }
             }
-
         }else{
             sender.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Not a player!");
         }
@@ -253,15 +281,20 @@ public class Commands implements CommandExecutor{
         for(UUID uuid : m.amountMap.keySet()){
             countTotal = countTotal + m.amountMap.get(uuid);
         }
+        for(Location loc : m.locMap.keySet()){
+            countTotal = countTotal + m.locMap.get(loc);
+        }
+        int all = m.amountMap.size() + m.locMap.size();
         p.sendMessage(beforeBig);
-        p.sendMessage(ChatColor.YELLOW + "There are " + count1 + " ("+ countMegered1 +  " merged) stack entities loaded and in this chunk there are " +
-                countChunk + " (" + countChunkMergered + " merged) stack entities. There is a total of " + m.amountMap.size() + " (" + countTotal + " merged) stack entities somewhere on this server.");
+        p.sendMessage(ChatColor.GOLD + "This chunk: " + ChatColor.YELLOW + countChunk + " (" + countChunkMergered + " merged) " +
+                ChatColor.GOLD + "Loaded in world: " + ChatColor.YELLOW + count1 + " (" + countMegered1 + " merged)");
+        p.sendMessage(ChatColor.GOLD + "This server: " + ChatColor.YELLOW + all + " (" + countTotal + " merged) ");
         String str = "";
         for(EntityType et : mobAmounts.keySet()){
-            str = str + mobAmounts.get(et) + "x " + et.toString() + ", ";
+            str = str + ChatColor.GOLD + mobAmounts.get(et) + "x " + ChatColor.YELLOW + et.toString() + ", ";
         }
-        p.sendMessage(ChatColor.BLUE + "Stack amount breakdown by entity type (loaded entities):");
-        p.sendMessage(ChatColor.GOLD + str);
+        p.sendMessage(ChatColor.GREEN + "Stack amount breakdown by entity type (loaded entities):");
+        p.sendMessage(str);
     }
 
     public void unStack(Player p, double x, double y, double z){

@@ -24,9 +24,12 @@ public class Configuration {
         filecon = YamlConfiguration.loadConfiguration(file);
     }
 
+
     public void makeConfig(){
         filecon.options().header("Thank you for downloading StackMob by antiPerson!\nPlease leave a review if this plugin has benefited your server!\n\nIf you need help post a reply to https://www.spigotmc.org/threads/stackmob.184178/");
         filecon.set("plugin.loginupdatechecker", true);
+        filecon.set("plugin.disable-data-saving", false);
+        filecon.set("plugin.use-old-data-format", false);
         filecon.set("creature.tag.visiblenothovered", true);
         filecon.set("creature.tag.text", "&b%amount%x &6%entity%");
         filecon.set("creature.tag.betterentitynames", true);
@@ -34,24 +37,26 @@ public class Configuration {
         filecon.set("creature.tag.updateinterval", 10);
         filecon.set("creature.tag.removeat.enabled", true);
         filecon.set("creature.tag.removeat.amount", 1);
-        filecon.set("creature.radius.x", 10);
-        filecon.set("creature.radius.y", 10);
-        filecon.set("creature.radius.z", 10);
+        filecon.set("creature.radius.x", 5);
+        filecon.set("creature.radius.y", 3);
+        filecon.set("creature.radius.z", 5);
         filecon.set("creature.tamed.check", true);
         filecon.set("creature.tamed.removetag", true);
         filecon.set("creature.leashed.check", true);
         filecon.set("creature.move.merge", true);
         filecon.set("creature.move.mergeinterval", 100);
         filecon.set("creature.stack.max", 20);
-        filecon.set("creature.stack.max-in-chunk", -1);
         filecon.set("creature.stack.delay", 1);
         filecon.set("creature.sheep.stacksamecolor", true);
         filecon.set("creature.sheep.stacksheared", true);
         filecon.set("creature.sheep.divideondye", true);
         filecon.set("creature.sheep.divideonshear", true);
         filecon.set("creature.sheep.shearall", false);
+        filecon.set("creature.mushroom-cow.shear-all", false);
+        filecon.set("creature.mushroom-cow.divide-on-shear", true);
         filecon.set("creature.slime.stacksamesize", true);
         filecon.set("creature.horses.stacksamecolor", true);
+        filecon.set("creature.check-parrot-color", true);
         if(!Bukkit.getVersion().contains("1.11")){
             filecon.set("creature.skeleton.stacksametype", true);
             filecon.set("creature.zombie.stacksamevillager", true);
@@ -66,9 +71,11 @@ public class Configuration {
         filecon.set("creature.kill-step.min", 1);
         filecon.set("creature.kill-step.max", 10);
         filecon.set("creature.kill-all.enabled", false);
+        filecon.set("creature.kill-all.death-reasons-blacklist", Collections.singletonList("FALL"));
+        filecon.set("creature.kill-all.entity-blacklist", Collections.singletonList(""));
         filecon.set("creature.kill-all.drops.multiply", true);
         filecon.set("creature.kill-all.drops.blacklist-enabled", true);
-        filecon.set("creature.kill-all.drops.blacklist", Collections.singletonList("IRON_CHESTPLATE"));
+        filecon.set("creature.kill-all.drops.blacklist", Arrays.asList("IRON_CHESTPLATE", "BOW", "SWORD"));
         filecon.set("creature.kill-all.drops.zombie-only-multiply-rottenflash", true);
         filecon.set("creature.kill-all.drops.ignore-armor", true);
         filecon.set("creature.kill-all.drops.chances-enabled", true);
@@ -94,9 +101,12 @@ public class Configuration {
         filecon.set("creature.spawnreasons.enabled", false);
         filecon.set("creature.spawnreasons.list", Collections.singletonList("SPAWNER"));
         filecon.set("creature.special.pig.maxstack", 25);
-        filecon.set("creature.special.pig.displaytag", "&b%amount%&6 of the amazing %entity%");
+        filecon.set("creature.special.pig.displaytag", "&b%amount%&6 %entity%");
         filecon.set("creature.special.pig.stackbackwards", false);
-        filecon.set("creature.update-metadata", true);
+        filecon.set("creature.update-metadata", false);
+        filecon.set("creature.bigger-priority", true);
+        filecon.set("creature.damage-multiply.enabled", true);
+        filecon.set("creature.damage-multiply.reasons", Collections.singletonList("FALL"));
         filecon.set("worldguard.enabled", false);
         filecon.set("worldguard.regions", Collections.singletonList("__global__"));
         filecon.set("worldguard.blacklist.enabled", false);
@@ -250,6 +260,35 @@ public class Configuration {
             updated = true;
             filecon.set("creature.update-metadata", true);
             filecon.set("creature.kill-all.drops.zombie-only-multiply-rottenflash", true);
+        }
+        if(!filecon.isBoolean("creature.bigger-priority")){
+            updated = true;
+            filecon.set("creature.bigger-priority", true);
+        }
+        if(!filecon.isBoolean("creature.multiply-fall-damage")){
+            updated = true;
+            filecon.set("creature.multiply-fall-damage", true);
+        }
+        if(!filecon.isList("creature.kill-all.death-reasons-blacklist")){
+            updated = true;
+            filecon.set("creature.kill-all.death-reasons-blacklist", Collections.singletonList("FALL"));
+            filecon.set("creature.kill-all.entity-blacklist", Collections.singletonList(""));
+            filecon.set("plugin.disable-data-saving", false);
+            filecon.set("plugin.use-old-data-format", false);
+        }
+        if(!filecon.isList("creature.damage.multiply")){
+            updated = true;
+            filecon.set("creature.damage-multiply.enabled", filecon.getBoolean("creature..multiply-fall-damage"));
+            filecon.set("creature.damage-multiply.reasons", Collections.singletonList("FALL"));
+        }
+        if(!filecon.isBoolean("creature.check-parrot-color")){
+            updated = true;
+            filecon.set("creature.check-parrot-color", true);
+        }
+        if(!filecon.isBoolean("creature.mushroom-cow.shear-all")){
+            updated = true;
+            filecon.set("creature.mushroom-cow.shear-all", false);
+            filecon.set("creature.mushroom-cow.divide-on-shear", true);
         }
         if(updated){
             m.getLogger().log(Level.INFO, "Updating your configuration file to the latest version...");

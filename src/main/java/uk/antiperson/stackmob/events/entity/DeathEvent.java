@@ -3,15 +3,15 @@ package uk.antiperson.stackmob.events.entity;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import uk.antiperson.stackmob.Configuration;
 import uk.antiperson.stackmob.api.events.StackDeathEvent;
 import uk.antiperson.stackmob.utils.EntityUtils;
@@ -19,7 +19,7 @@ import uk.antiperson.stackmob.StackMob;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 /**
  * Created by nathat on 02/10/16.
@@ -27,7 +27,7 @@ import java.util.Random;
 public class DeathEvent implements Listener {
 
     private Configuration config;
-    private Random rand = new Random();
+    private SplittableRandom rand = new SplittableRandom();
     private StackMob st;
     public DeathEvent(StackMob st){
         config = st.config;
@@ -40,12 +40,66 @@ public class DeathEvent implements Listener {
         if(st.amountMap.containsKey(e.getEntity().getUniqueId())){
             if(st.amountMap.get(e.getEntity().getUniqueId()) > 1){
                 Entity ea = e.getEntity();
+                 if(config.getFilecon().getBoolean("creature.kill-step.enabled") || ea.hasMetadata("stackmob-damage")) {
+                    List<ItemStack> isl = e.getDrops();
+                    int diff = config.getFilecon().getInt("creature.kill-step.max") - config.getFilecon().getInt("creature.kill-step.min");
+                    int n = config.getFilecon().getInt("creature.kill-step-min") + rand.nextInt(diff) + 1;
+                    double leftOver = 0;
+                    if(ea.hasMetadata("stackmob-damage")){
+                        double mobAmount = ((e.getEntity().getLastDamage() * st.amountMap.get(e.getEntity().getUniqueId())) * rand.nextDouble()) / getMaxHealth(e.getEntity());
+                        if(mobAmount < 1){
+                            mobAmount = 1;
+                        }
+                        n = (int) Math.floor(mobAmount);
+                        leftOver = (mobAmount - n) * getMaxHealth(e.getEntity());
+                    }
+                    if(e.getEntity().getLastDamageCause().getCause() != EntityDamageEvent.DamageCause.FALL){
+                        e.setDroppedExp((int) generateXpRandom(n, e.getDroppedExp()));
+                    }
+                    LivingEntity es = null;
+                    if(st.amountMap.get(ea.getUniqueId()) <= n){
+                        isl.addAll(multiplyDrops(e.getDrops(), e.getEntity(), e.getEntity().getKiller(), st.amountMap.get(ea.getUniqueId())));
+                    }else{
+                        isl.addAll(multiplyDrops(e.getDrops(), e.getEntity(), e.getEntity().getKiller(), n));
+                        int before = st.amountMap.get(e.getEntity().getUniqueId());
+                        EntityUtils eu = new EntityUtils(st);
+                        es = (LivingEntity) eu.createEntity(ea, true, true);
+                        st.amountMap.put(es.getUniqueId(), before - n);
+                        if(leftOver != 0){
+                            es.setHealth(getMaxHealth(e.getEntity()) - leftOver);
+                        }
+                    }
+                    StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
+                            true, n, e.getEntity().getKiller(), e.getDroppedExp(), isl, st.getAPI().getEntityManager().getStackedEntity(es));
+                    Bukkit.getPluginManager().callEvent(sde);
+                    if(sde.isCancelled()){
+                        return;
+                    }
+                    e.setDroppedExp(sde.getXp());
+                    if(!isl.equals(e.getDrops())){
+                        for(ItemStack is: sde.getDrops()){
+                            ea.getWorld().dropItemNaturally(ea.getLocation(), is);
+                        }
+                    }
+                    return;
+                }
                 if(killAll){
+                    if(config.getFilecon().getStringList("creature.kill-all.death-reasons-blacklist").contains(e.getEntity().getLastDamageCause().getCause().toString()) ||
+                            config.getFilecon().getStringList("creature.kill-all.entity-blacklist").contains(e.getEntity().getType().toString())){
+                        EntityUtils eu = new EntityUtils(st);
+                        Entity es = eu.createEntity(ea, true, true);
+                        StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
+                                true, 1, e.getEntity().getKiller(), e.getDroppedExp(), e.getDrops(), st.getAPI().getEntityManager().getStackedEntity(es));
+                        Bukkit.getPluginManager().callEvent(sde);
+                        return;
+                    }
                     List<ItemStack> isl = e.getDrops();
                     if(config.getFilecon().getBoolean("creature.kill-all.drops.multiply")){
                         isl = multiplyDrops(e.getDrops(), ea, e.getEntity().getKiller(),  st.amountMap.get(ea.getUniqueId()));
                     }
-                    e.setDroppedExp((int) generateXpRandom(st.amountMap.get(ea.getUniqueId()), e.getDroppedExp()));
+                    if(e.getEntity().getLastDamageCause().getCause() != EntityDamageEvent.DamageCause.FALL) {
+                        e.setDroppedExp((int) generateXpRandom(st.amountMap.get(ea.getUniqueId()), e.getDroppedExp()));
+                    }
                     if(ea instanceof Slime){
                         if(((Slime)ea).getSize() <= 1){
                             st.amountMap.remove(ea.getUniqueId());
@@ -65,39 +119,13 @@ public class DeathEvent implements Listener {
                             ea.getWorld().dropItemNaturally(ea.getLocation(), is);
                         }
                     }
-                }else if(config.getFilecon().getBoolean("creature.kill-step.enabled")) {
-                    List<ItemStack> isl = e.getDrops();
-                    int diff = config.getFilecon().getInt("creature.kill-step.max") - config.getFilecon().getInt("creature.kill-step.min");
-                    int n = config.getFilecon().getInt("creature.kill-step-min") + new Random().nextInt(diff) + 1;
-                    Entity es = null;
-                    if(st.amountMap.get(ea.getUniqueId()) <= n){
-                        isl.addAll(multiplyDrops(e.getDrops(), e.getEntity(), e.getEntity().getKiller(), st.amountMap.get(ea.getUniqueId())));
-                    }else{
-                        isl.addAll(multiplyDrops(e.getDrops(), e.getEntity(), e.getEntity().getKiller(), n));
-                        int before = st.amountMap.get(e.getEntity().getUniqueId());
-                        EntityUtils eu = new EntityUtils(st);
-                        es = eu.createEntity(ea, true, true);
-                        st.amountMap.put(es.getUniqueId(), before - n);
-                    }
-                    StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
-                            true, n, e.getEntity().getKiller(), e.getDroppedExp(), isl, st.getAPI().getEntityManager().getStackedEntity(es));
-                    Bukkit.getPluginManager().callEvent(sde);
-                    if(sde.isCancelled()){
-                        return;
-                    }
-                    e.setDroppedExp(sde.getXp());
-                    if(!isl.equals(e.getDrops())){
-                        for(ItemStack is: sde.getDrops()){
-                            ea.getWorld().dropItemNaturally(ea.getLocation(), is);
-                        }
-                    }
-                }else{
-                    EntityUtils eu = new EntityUtils(st);
-                    Entity es = eu.createEntity(ea, true, true);
-                    StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
-                            true, 1, e.getEntity().getKiller(), e.getDroppedExp(), e.getDrops(), st.getAPI().getEntityManager().getStackedEntity(es));
-                    Bukkit.getPluginManager().callEvent(sde);
+                    return;
                 }
+                EntityUtils eu = new EntityUtils(st);
+                Entity es = eu.createEntity(ea, true, true);
+                StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
+                        true, 1, e.getEntity().getKiller(), e.getDroppedExp(), e.getDrops(), st.getAPI().getEntityManager().getStackedEntity(es));
+                Bukkit.getPluginManager().callEvent(sde);
             }else{
                 st.amountMap.remove(e.getEntity().getUniqueId());
                 StackDeathEvent sde = new StackDeathEvent(st.getAPI().getEntityManager().getStackedEntity(e.getEntity()), false,
@@ -114,7 +142,15 @@ public class DeathEvent implements Listener {
         for(ItemStack is : drops){
             if (ea instanceof Zombie) {
                 if (config.getFilecon().getBoolean("creature.kill-all.drops.zombie-only-multiply-rottenflash")) {
-                   if (!is.getType().equals(Material.ROTTEN_FLESH)) continue;
+                   if(ea instanceof PigZombie){
+                       if (is.getType() != Material.ROTTEN_FLESH && is.getType() != Material.GOLD_NUGGET){
+                           continue;
+                       }
+                   }else{
+                       if (is.getType() != Material.ROTTEN_FLESH){
+                           continue;
+                       }
+                   }
                 }
             }
             if(config.getFilecon().getBoolean("creature.kill-all.drops.blacklist-enabled")){
@@ -138,19 +174,20 @@ public class DeathEvent implements Listener {
                             isl.addAll(dropCorrectAmount(rand.nextInt(1) + 1, is, ea.getLocation(), killer));
                         }
                     }
-                }else{
-                    int a = (int) generateRandom(mobAmount);
-                    is.setAmount(0);
-                    isl.addAll(dropCorrectAmount(a, is, ea.getLocation(), killer));
+                    continue;
                 }
-            }else{
-                int a = (int) generateRandom(mobAmount);
+            }else if(ea instanceof Wither && is.getType() == Material.NETHER_STAR){
                 is.setAmount(0);
-                isl.addAll(dropCorrectAmount(a, is, ea.getLocation(), killer));
+                isl.addAll(dropCorrectAmount(st.amountMap.get(ea.getUniqueId()), is, ea.getLocation(), null));
+                continue;
             }
+            int a = (int) generateRandom(mobAmount);
+            is.setAmount(0);
+            isl.addAll(dropCorrectAmount(a, is, ea.getLocation(), killer));
         }
         return isl;
     }
+
 
     public float generateRandom(int mobAmount){
         double a =  1 + rand.nextInt(1) + rand.nextDouble();
@@ -203,4 +240,11 @@ public class DeathEvent implements Listener {
         return isl;
     }
 
+    public double getMaxHealth(LivingEntity e){
+        if(!st.isLegacy() || st.getServer().getVersion().contains("1.8")){
+            return e.getMaxHealth();
+        }else{
+            return e.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+        }
+    }
 }

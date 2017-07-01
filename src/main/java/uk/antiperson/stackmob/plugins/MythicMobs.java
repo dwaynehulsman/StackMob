@@ -1,8 +1,7 @@
 package uk.antiperson.stackmob.plugins;
 
-import net.elseland.xikage.MythicMobs.API.Exceptions.InvalidMobTypeException;
-import net.elseland.xikage.MythicMobs.API.IMobsAPI;
-import net.elseland.xikage.MythicMobs.Mobs.ActiveMob;
+import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
+import io.lumine.xikage.mythicmobs.mobs.MobManager;
 import org.bukkit.entity.Entity;
 import uk.antiperson.stackmob.StackMob;
 
@@ -16,18 +15,14 @@ public class MythicMobs {
         this.sm = sm;
     }
 
-    public Entity spawnMythicMob(Entity ea){
+    public Entity spawnMythicMob(Entity ea) {
         ActiveMob am = getMythicMobs().getMythicMobInstance(ea);
-        try{
-            return getMythicMobs().spawnMythicMob(am.getType() ,ea.getLocation());
-        }catch(InvalidMobTypeException esa){
-            return ea.getWorld().spawnEntity(ea.getLocation(), ea.getType());
-        }
+        return getMythicMobs().spawnMob(am.getType().getInternalName(), ea.getLocation()).getLivingEntity();
     }
 
-    public IMobsAPI getMythicMobs(){
-        net.elseland.xikage.MythicMobs.MythicMobs mm = (net.elseland.xikage.MythicMobs.MythicMobs) sm.getServer().getPluginManager().getPlugin("MythicMobs");
-        return mm.getAPI().getMobAPI();
+    public MobManager getMythicMobs(){
+        io.lumine.xikage.mythicmobs.MythicMobs mm = (io.lumine.xikage.mythicmobs.MythicMobs) sm.getServer().getPluginManager().getPlugin("MythicMobs");
+        return mm.getMobManager();
     }
 
     public String getMythicMobsVersion(){

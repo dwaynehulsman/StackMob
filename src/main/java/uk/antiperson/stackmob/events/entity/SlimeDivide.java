@@ -7,7 +7,7 @@ import org.bukkit.event.entity.SlimeSplitEvent;
 import uk.antiperson.stackmob.utils.EntityUtils;
 import uk.antiperson.stackmob.StackMob;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 /**
  * Created by nathat on 26/11/16.
@@ -22,7 +22,7 @@ public class SlimeDivide implements Listener {
     @EventHandler
     public void onSlimeDivide(SlimeSplitEvent e){
         if(sm.amountMap.containsKey(e.getEntity().getUniqueId()) && sm.amountMap.get(e.getEntity().getUniqueId()) > 1){
-            Random rand = new Random();
+            SplittableRandom rand = new SplittableRandom();
             int slimeCount = (int) Math.round((2 + rand.nextInt(1) + rand.nextDouble() + rand.nextDouble()) * sm.amountMap.get(e.getEntity().getUniqueId())) - e.getCount();
             EntityUtils eu = new EntityUtils(sm);
             Slime s = (Slime) eu.createEntity(e.getEntity(), false, true);

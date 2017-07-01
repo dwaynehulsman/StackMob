@@ -3,12 +3,15 @@ package uk.antiperson.stackmob.utils;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.entity.*;
 import org.bukkit.metadata.FixedMetadataValue;
 import uk.antiperson.stackmob.Configuration;
 import uk.antiperson.stackmob.StackMob;
 import uk.antiperson.stackmob.plugins.MythicMobs;
+
+import java.util.UUID;
 
 /**
  * Created by nathat on 28/10/16.
@@ -54,7 +57,8 @@ public class EntityUtils {
         Entity en;
         if(Bukkit.getServer().getPluginManager().getPlugin("MythicMobs") != null) {
             if (config.getFilecon().getBoolean("mythicmobs.enabled")) {
-                if (mm.getMythicMobs().isMythicMob(ea)) {
+
+                if (mm.getMythicMobs().isActiveMob(ea.getUniqueId())) {
                     en = mm.spawnMythicMob(ea);
                 } else {
                     en = ea.getWorld().spawnEntity(ea.getLocation(), ea.getType());
@@ -93,12 +97,12 @@ public class EntityUtils {
         if(villagerStackSameProfession && ea instanceof Villager){
             ((Villager)en).setProfession(((Villager)ea).getProfession());
         }
-        if(!Bukkit.getVersion().contains("1.11")){
+        if(!Bukkit.getVersion().contains("1.11") && !Bukkit.getVersion().contains("1.12")){
             if(skeletonType && ea instanceof Skeleton){
                 ((Skeleton)en).setSkeletonType(((Skeleton)ea).getSkeletonType());
             }
             if(zombieIsVillager && ea instanceof Zombie ){
-                if(!Bukkit.getVersion().contains("1.8") && !st.isLegacy()) {
+                if(!Bukkit.getVersion().contains("1.8") && st.isLegacy()) {
                     ((Zombie) en).setVillagerProfession(((Zombie) ea).getVillagerProfession());
                 }else{
                     ((Zombie) en).setVillager(((Zombie) ea).isVillager());
@@ -115,10 +119,15 @@ public class EntityUtils {
                 ((Llama)en).setColor(((Llama)ea).getColor());
             }
         }
+        if(Bukkit.getVersion().contains("1.12")){
+            if(config.getFilecon().getBoolean("creature.check-parrot-color") && ea instanceof Parrot){
+                ((Parrot)en).setVariant(((Parrot)ea).getVariant());
+            }
+        }
         if(keepFire){
             en.setFireTicks(ea.getFireTicks());
         }
-        if(!Bukkit.getVersion().contains("1.8") && !st.isLegacy()) {
+        if(!Bukkit.getVersion().contains("1.8") && st.isLegacy()) {
             ((LivingEntity) en).setAI(!config.getFilecon().getBoolean("creature.disablemobai"));
         }else if((Bukkit.getVersion().contains("1.8.8") || Bukkit.getVersion().contains("1.8.9")) && config.getFilecon().getBoolean("creature.disablemobai")){
             setAI(en);
@@ -132,16 +141,27 @@ public class EntityUtils {
             st.amountMap.remove(ea.getUniqueId());
             st.noStack.add(en.getUniqueId());
         }
-        if(config.getFilecon().getBoolean("mcmmo.disable-xp") && st.isLegacy()){
+        if(config.getFilecon().getBoolean("mcmmo.disable-xp")){
             if(config.getFilecon().getBoolean("mcmmo.use-whitelist")){
                 if(!config.getFilecon().getStringList("mcmmo.whitelist").contains(ea.getType().toString())){
-                    ea.setMetadata("mcMMO: Spawned Entity", new FixedMetadataValue(st.getServer().getPluginManager().getPlugin("mcMMO"), false));
+                    en.setMetadata("mcMMO: Spawned Entity", new FixedMetadataValue(Bukkit.getPluginManager().getPlugin("mcMMO"), false));
                 }
             }else{
-                ea.setMetadata("mcMMO: Spawned Entity", new FixedMetadataValue(st.getServer().getPluginManager().getPlugin("mcMMO"), false));
+                en.setMetadata("mcMMO: Spawned Entity", new FixedMetadataValue(Bukkit.getPluginManager().getPlugin("mcMMO"), false));
             }
         }
         return en;
+    }
+
+    public Entity getEntityFromUuid(UUID uuid){
+        for(World world : Bukkit.getWorlds()){
+            for(LivingEntity e : world.getLivingEntities()){
+                if(e.getUniqueId().equals(uuid)){
+                    return  e;
+                }
+            }
+        }
+        return null;
     }
 
     public void setAI(Entity e){

@@ -1,6 +1,6 @@
 package uk.antiperson.stackmob.tasks;
 
-import net.elseland.xikage.MythicMobs.Mobs.ActiveMob;
+import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.*;
@@ -51,6 +51,7 @@ public class CheckEntites extends BukkitRunnable {
         boolean sameSkeleton = config.getFilecon().getBoolean("creature.skeleton.stacksametype");
         boolean checkBreeding = config.getFilecon().getBoolean("creature.breeding");
         boolean sameLlama = config.getFilecon().getBoolean("creature.stacksamellama");
+        boolean sameParrot = config.getFilecon().getBoolean("creature.check-parrot-color");
         List<String> worlds = config.getFilecon().getStringList("creature.worlds.list");
         List<String> blacklist = config.getFilecon().getStringList("creature.blacklist.list");
         List<String> whitelist = config.getFilecon().getStringList("creature.whitelist.list");
@@ -108,7 +109,7 @@ public class CheckEntites extends BukkitRunnable {
                                         }
                                     }
                                 }
-                                if (sheepSheared && le instanceof Sheep && e instanceof Sheep) {
+                                if (sheepSheared && le instanceof Sheep) {
                                     if ((((Sheep) e).isSheared() != ((Sheep) le).isSheared())) {
                                         continue;
                                     }
@@ -118,23 +119,30 @@ public class CheckEntites extends BukkitRunnable {
                                         continue;
                                     }
                                 }
-                                if(horseSameColor && e instanceof Horse && le instanceof Horse){
+                                if(horseSameColor && e instanceof Horse){
                                     if(((Horse)e).getColor() != ((Horse)le).getColor()){
                                         continue;
                                     }
                                 }
-                                if(villagerStackSameProfession && e instanceof Villager && le instanceof Villager){
+                                if(villagerStackSameProfession && e instanceof Villager){
                                     if(((Villager)e).getProfession() != ((Villager)le).getProfession()){
                                         continue;
                                     }
                                 }
-                                if(!Bukkit.getVersion().contains("1.11")){
-                                    if(horseSameType && e instanceof Horse && le instanceof Horse){
+                                if(Bukkit.getVersion().contains("1.12")){
+                                    if(sameParrot && e instanceof Parrot){
+                                        if(((Parrot)e).getVariant() != ((Parrot)le).getVariant()){
+                                            continue;
+                                        }
+                                    }
+                                }
+                                if(!Bukkit.getVersion().contains("1.11") && !Bukkit.getVersion().contains("1.12")){
+                                    if(horseSameType && e instanceof Horse){
                                         if(((Horse)e).getDomestication() != ((Horse)le).getDomestication()){
                                             continue;
                                         }
                                     }
-                                    if(zombieIsVillager && e instanceof Zombie && le instanceof Zombie){
+                                    if(zombieIsVillager && e instanceof Zombie ){
                                         if(!Bukkit.getVersion().contains("1.8") && !Bukkit.getVersion().contains("1.7")){
                                             if(((Zombie)e).getVillagerProfession() != ((Zombie)le).getVillagerProfession()){
                                                 continue;
@@ -169,13 +177,13 @@ public class CheckEntites extends BukkitRunnable {
                                 }
                                 if(Bukkit.getServer().getPluginManager().getPlugin("MythicMobs") != null){
                                     if(config.getFilecon().getBoolean("mythicmobs.enabled")) {
-                                        if (mm.getMythicMobs().isMythicMob(e) && mm.getMythicMobs().isMythicMob(le)) {
+                                        if (mm.getMythicMobs().isActiveMob(e.getUniqueId()) && mm.getMythicMobs().isActiveMob(le.getUniqueId())) {
                                             ActiveMob am = mm.getMythicMobs().getMythicMobInstance(e);
                                             ActiveMob am2 = mm.getMythicMobs().getMythicMobInstance(le);
                                             if (am.getType() != am2.getType()) {
                                                 continue;
                                             }
-                                        }else if(mm.getMythicMobs().isMythicMob(e) != mm.getMythicMobs().isMythicMob(le)){
+                                        }else if(mm.getMythicMobs().isActiveMob(e.getUniqueId()) != mm.getMythicMobs().isActiveMob(le.getUniqueId())){
                                             continue;
                                         }
                                     }
@@ -212,6 +220,15 @@ public class CheckEntites extends BukkitRunnable {
                 return true;
             }
         }
+        if(e.hasMetadata("FactionMob")){
+            return true;
+        }
+        if(e.hasMetadata("NPC")){
+            return true;
+        }
+        if(sm.noStackingAtAll.contains(e.getUniqueId())){
+            return true;
+        }
         return false;
     }
 
@@ -228,11 +245,7 @@ public class CheckEntites extends BukkitRunnable {
                 if(ese.isCancelled()){
                     return;
                 }
-                if (mazStack == -1) {
-                    e.remove();
-                    sm.amountMap.put(p.getUniqueId(), a);
-                    sm.amountMap.remove(e.getUniqueId());
-                } else if (a > mazStack) {
+                if (a > mazStack) {
                     if ((sm.amountMap.get(p.getUniqueId()) != mazStack) && (sm.amountMap.get(e.getUniqueId()) != mazStack)) {
                         e.remove();
                         int a1 = a - mazStack;
@@ -243,9 +256,21 @@ public class CheckEntites extends BukkitRunnable {
                         sm.noStack.add(neb.getUniqueId());
                     }
                 } else {
-                    e.remove();
-                    sm.amountMap.put(p.getUniqueId(), a);
-                    sm.amountMap.remove(e.getUniqueId());
+                    if(config.getFilecon().getBoolean("creature.bigger-priority")){
+                        if(sm.amountMap.get(p.getUniqueId()) >= sm.amountMap.get(e.getUniqueId())){
+                            e.remove();
+                            sm.amountMap.put(p.getUniqueId(), a);
+                            sm.amountMap.remove(e.getUniqueId());
+                        }else{
+                            p.remove();
+                            sm.amountMap.put(e.getUniqueId(), a);
+                            sm.amountMap.remove(p.getUniqueId());
+                        }
+                    }else{
+                        p.remove();
+                        sm.amountMap.put(e.getUniqueId(), a);
+                        sm.amountMap.remove(p.getUniqueId());
+                    }
                 }
             }else{
                 sm.mobUuids.remove(e.getUniqueId());

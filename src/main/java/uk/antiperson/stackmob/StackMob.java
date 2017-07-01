@@ -1,12 +1,11 @@
 package uk.antiperson.stackmob;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
+import org.bstats.Metrics;
+import org.bukkit.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.mcstats.Metrics;
 import uk.antiperson.stackmob.api.StackMobAPI;
 import uk.antiperson.stackmob.events.*;
 import uk.antiperson.stackmob.events.entity.*;
@@ -15,9 +14,9 @@ import uk.antiperson.stackmob.tasks.CheckEntites;
 import uk.antiperson.stackmob.tasks.MetadataUpdater;
 import uk.antiperson.stackmob.tasks.TagUpdater;
 import uk.antiperson.stackmob.utils.CreatureData;
+import uk.antiperson.stackmob.utils.EntityTranslation;
 import uk.antiperson.stackmob.utils.Updater;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -28,22 +27,32 @@ public class StackMob extends JavaPlugin {
 
     // Prevent from getting merged on the CheckEntities task.
     public HashSet<UUID> mobUuids = new HashSet<UUID>();
-    // Map of the colour that is dyed in a stack of sheep
-    public HashMap<UUID, DyeColor> lastDyed = new HashMap<UUID, DyeColor>();
-    // Contains monster amounts
+    // Contains monster amounts (currently loaded in world)
     public HashMap<UUID, Integer> amountMap = new HashMap<UUID, Integer>();
+    // Contains monster amounts (currently unloaded)
+    public HashMap<Location, Integer> locMap = new HashMap<Location, Integer>();
     // Prevent from stacking on first spawn
     public HashSet<UUID> noStack = new HashSet<UUID>();
     // Wand of stacked mobs map, player UUID to monster UUID
     public HashMap<UUID, UUID> playerToMob = new HashMap<UUID, UUID>();
+    // Prevent from stacking at all until removed.
+    public HashSet<UUID> noStackingAtAll = new HashSet<UUID>();
+    // Currently in love entities
+    public HashSet<UUID> love = new HashSet<UUID>();
+    // If the entity need to added to database (player, monster)
+    public HashMap<UUID, UUID> added = new HashMap<UUID, UUID>();
+
     public Configuration config;
+    public EntityTranslation et;
 
     public boolean firstTime = false;
+    public boolean debuggerMode = false;
 
     @Override
     public void onEnable(){
         long time = new Date().getTime();
         config = new Configuration(this);
+        et = new EntityTranslation(this);
         Updater up = new Updater(this);
         getLogger().log(Level.INFO, "StackMob v" + getDescription().getVersion() + " by antiPerson");
         getLogger().log(Level.INFO, "Find out more at " + getDescription().getWebsite());
@@ -61,6 +70,13 @@ public class StackMob extends JavaPlugin {
             getLogger().log(Level.INFO, "Configuration file made at " + config.getFile().getAbsolutePath());
         }else{
             config.updateConfig();
+        }
+        if(!config.getFile().exists()){
+            getLogger().log(Level.INFO, "Entity translations file not found, making one for you...");
+            et.generateTranslation();
+            getLogger().log(Level.INFO, "Entity translations file made at " + et.getFile().getAbsolutePath());
+        }else{
+            et.updateTranslations();
         }
         config = new Configuration(this);
         getLogger().log(Level.INFO, "Loading stack amounts from storage...");
@@ -81,7 +97,7 @@ public class StackMob extends JavaPlugin {
         if(config.getFilecon().getBoolean("creature.sheep.divideondye")) {
             getServer().getPluginManager().registerEvents(new DyeEvent(this), this);
         }
-        getServer().getPluginManager().registerEvents(new PlayerInteractEntityEvent(this), this);
+        getServer().getPluginManager().registerEvents(new InteractEntityEvent(this), this);
         if(config.getFilecon().getBoolean("creature.no-targeting")) {
             getServer().getPluginManager().registerEvents(new EntityTargetPlayerEvent(this), this);
         }
@@ -94,12 +110,18 @@ public class StackMob extends JavaPlugin {
         if(config.getFilecon().getBoolean("creature.kill-all.enabled") && config.getFilecon().getBoolean("creature.multiplyslimes")){
             getServer().getPluginManager().registerEvents(new SlimeDivide(this), this);
         }
-        if(config.getFilecon().getBoolean("creature.all-damage.enabled")){
+        if(config.getFilecon().getBoolean("creature.damage-multiply.enabled")){
             getServer().getPluginManager().registerEvents(new EntityDamage(this), this);
         }
+        getServer().getPluginManager().registerEvents(new EntityDamageByEntity(this), this);
         getServer().getPluginManager().registerEvents(new ShearEvent(this), this);
         getServer().getPluginManager().registerEvents(new JoinEvent(this), this);
         getServer().getPluginManager().registerEvents(new InvEvent(this), this);
+        getServer().getPluginManager().registerEvents(new ChatEvent(this), this);
+        if(!config.getFilecon().getBoolean("plugin.use-old-data-format") && !isLegacy()){
+            getServer().getPluginManager().registerEvents(new ChunkLoad(this), this);
+            getServer().getPluginManager().registerEvents(new ChunkUnload(this), this);
+        }
         getCommand("sm").setExecutor(new Commands(this));
         getLogger().log(Level.INFO, "Registered all commands and events!");
         if(getServer().getVersion().contains("1.8")){
@@ -116,19 +138,25 @@ public class StackMob extends JavaPlugin {
             getLogger().log(Level.INFO, "WorldGuard v" + wg.getWorldGuard().getDescription().getVersion() + " has been detected!");
         }
         up.checkUpdate(false, null);
-        try {
-            Metrics metrics = new Metrics(this);
-            metrics.start();
-        } catch (IOException e) {
-            getLogger().log(Level.WARNING, "Something went wrong while enabling metrics!");
-        }
+        Metrics metrics = new Metrics(this);
         getLogger().log(Level.INFO, "Loaded everything in " + (new Date().getTime() - time) + "ms");
     }
 
     @Override
     public void onDisable(){
         getLogger().log(Level.INFO, "Saving all creature amount data...");
-        new CreatureData(this).makeStore();
+        if(config.getFilecon().getBoolean("plugin.disable-data-saving")){
+            for(World world : Bukkit.getWorlds()){
+                for(Entity e : world.getLivingEntities()){
+                    if(amountMap.get(e.getUniqueId()) != null){
+                        e.remove();
+                        amountMap.remove(e.getUniqueId());
+                    }
+                }
+            }
+        }else{
+            new CreatureData(this).makeStore();
+        }
         getServer().getScheduler().cancelTasks(this);
     }
 
@@ -136,6 +164,7 @@ public class StackMob extends JavaPlugin {
         return new StackMobAPI(this);
     }
 
+    // Is actually the inverse of that, for some reason.
     public boolean isLegacy(){
         return !Bukkit.getServer().getVersion().contains("1.7") && !Bukkit.getServer().getVersion().contains("1.6") && !Bukkit.getServer().getVersion().contains("1.5");
     }

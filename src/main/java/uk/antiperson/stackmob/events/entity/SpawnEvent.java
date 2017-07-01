@@ -1,6 +1,6 @@
 package uk.antiperson.stackmob.events.entity;
 
-import net.elseland.xikage.MythicMobs.Mobs.ActiveMob;
+import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -18,6 +18,7 @@ import uk.antiperson.stackmob.utils.States;
 import uk.antiperson.stackmob.plugins.WorldGuard;
 
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Created by nathat on 02/10/16.
@@ -45,12 +46,24 @@ public class SpawnEvent implements Listener {
                     st.noStack.remove(ea.getUniqueId());
                     return;
                 }
+                if(st.noStackingAtAll.contains(ea.getUniqueId())){
+                    return;
+                }
+                if(ea.hasMetadata("FactionMob")){
+                    return;
+                }
+                if(ea.hasMetadata("NPC")){
+                    return;
+                }
                 if(st.isLegacy()) {
-                    if (ea.getType() == EntityType.ARMOR_STAND) {
+                    if (ea instanceof ArmorStand) {
                         return;
                     }
                 }
                 if(ea.getType() == EntityType.UNKNOWN){
+                    return;
+                }
+                if(ea.isDead()){
                     return;
                 }
                 CreatureSpawnEvent.SpawnReason sr = e.getSpawnReason();
@@ -99,7 +112,16 @@ public class SpawnEvent implements Listener {
                 }
                 for (Entity i : ea.getNearbyEntities(x, y, z)) {
                     if (i.getType() == ea.getType()) {
-                        if (st.amountMap.containsKey(i.getUniqueId()) && i instanceof LivingEntity) {
+                        if (st.amountMap.containsKey(i.getUniqueId()) && i instanceof LivingEntity && !st.noStackingAtAll.contains(i.getUniqueId())) {
+                            if(ea.hasMetadata("FactionMob")){
+                                return;
+                            }
+                            if(ea.hasMetadata("NPC")){
+                                return;
+                            }
+                            if(ea.isDead()){
+                                return;
+                            }
                             sta = States.TWO;
                             if (Bukkit.getPluginManager().getPlugin("WorldGuard") != null) {
                                 WorldGuard wg = new WorldGuard(st);
@@ -153,6 +175,7 @@ public class SpawnEvent implements Listener {
         boolean skeletonType = config.getFilecon().getBoolean("creature.skeleton.stacksametype");
         boolean canBreed = config.getFilecon().getBoolean("creature.breeding");
         boolean lamaSame = config.getFilecon().getBoolean("creature.stacksamellama");
+        boolean parrotSame = config.getFilecon().getBoolean("creature.check-parrot-color");
         if (tamedCheck) {
             if (i instanceof Tameable) {
                 Tameable t = (Tameable) i;
@@ -195,12 +218,19 @@ public class SpawnEvent implements Listener {
                 return true;
             }
         }
-        if(horseSameColor && ea instanceof Horse && i instanceof Horse){
+        if(horseSameColor && ea instanceof Horse){
             if(((Horse)ea).getColor() != ((Horse)i).getColor()){
                 return true;
             }
         }
-        if(!Bukkit.getVersion().contains("1.11")){
+        if(Bukkit.getVersion().contains("1.12")){
+            if(parrotSame && ea instanceof Parrot){
+                if(((Parrot)ea).getVariant() != ((Parrot)i).getVariant()){
+                    return true;
+                }
+            }
+        }
+        if(!Bukkit.getVersion().contains("1.11") || !Bukkit.getVersion().contains("1.12")){
             if(zombieIsVillager && ea instanceof Zombie && i instanceof Zombie){
                 if(!Bukkit.getVersion().contains("1.8") && !Bukkit.getVersion().contains("1.7")) {
                     if (((Zombie) ea).getVillagerProfession() != ((Zombie) i).getVillagerProfession()) {
@@ -241,7 +271,7 @@ public class SpawnEvent implements Listener {
         }
         if(Bukkit.getServer().getPluginManager().getPlugin("MythicMobs") != null){
             if(config.getFilecon().getBoolean("mythicmobs.enabled")) {
-                if (mm.getMythicMobs().isMythicMob(i) && mm.getMythicMobs().isMythicMob(ea)) {
+                if (mm.getMythicMobs().isActiveMob(i.getUniqueId()) && mm.getMythicMobs().isActiveMob(ea.getUniqueId())) {
                     ActiveMob am = mm.getMythicMobs().getMythicMobInstance(ea);
                     ActiveMob am2 = mm.getMythicMobs().getMythicMobInstance(i);
                     if (am.getType() != am2.getType()) {
@@ -255,36 +285,45 @@ public class SpawnEvent implements Listener {
 
 
     private void ok(Entity p, Entity ea) {
-        if (p != null) {
-            st.amountMap.put(ea.getUniqueId(), 1);
-            EntityStackEvent ese = new EntityStackEvent(p, ea, st, MergeType.SPAWN_NEAR);
-            Bukkit.getServer().getPluginManager().callEvent(ese);
-            if(!ese.isCancelled()){
-                ea.remove();
-                st.amountMap.remove(ea.getUniqueId());
-                st.amountMap.put(p.getUniqueId(), (st.amountMap.get(p.getUniqueId()) + 1));
-            }
-        } else {
-            EntityStackEvent ese = new EntityStackEvent(null, ea, st, MergeType.NEW_STACK);
-            Bukkit.getServer().getPluginManager().callEvent(ese);
-            if(ese.isCancelled()){
-                return;
-            }
-            st.amountMap.put(ea.getUniqueId(), 1);
-            if(!Bukkit.getVersion().contains("1.8") && !Bukkit.getVersion().contains("1.7")) {
-                ((LivingEntity) ea).setAI(!config.getFilecon().getBoolean("creature.disablemobai"));
-            }else if((Bukkit.getVersion().contains("1.8.8")  || Bukkit.getVersion().contains("1.8.9")) && config.getFilecon().getBoolean("creature.disablemobai")){
-                new EntityUtils(st).setAI(ea);
-            }
-            if(config.getFilecon().getBoolean("mcmmo.disable-xp") && st.isLegacy()){
-                if(config.getFilecon().getBoolean("mcmmo.use-whitelist")){
-                    if(!config.getFilecon().getStringList("mcmmo.whitelist").contains(ea.getType().toString())){
-                        return;
-                    }
+        try{
+            if (p != null) {
+                st.amountMap.put(ea.getUniqueId(), 1);
+                EntityStackEvent ese = new EntityStackEvent(p, ea, st, MergeType.SPAWN_NEAR);
+                Bukkit.getServer().getPluginManager().callEvent(ese);
+                if(!ese.isCancelled()){
+                    ea.remove();
+                    st.amountMap.remove(ea.getUniqueId());
+                    st.amountMap.put(p.getUniqueId(), (st.amountMap.get(p.getUniqueId()) + 1));
                 }
-                ea.setMetadata("mcMMO: Spawned Entity", new FixedMetadataValue(st.getServer().getPluginManager().getPlugin("mcMMO"), false));
+            } else {
+                EntityStackEvent ese = new EntityStackEvent(null, ea, st, MergeType.NEW_STACK);
+                Bukkit.getServer().getPluginManager().callEvent(ese);
+                if(ese.isCancelled()){
+                    return;
+                }
+                st.amountMap.put(ea.getUniqueId(), 1);
+                if(!Bukkit.getVersion().contains("1.8") && !Bukkit.getVersion().contains("1.7")) {
+                    ((LivingEntity) ea).setAI(!config.getFilecon().getBoolean("creature.disablemobai"));
+                }else if((Bukkit.getVersion().contains("1.8.8")  || Bukkit.getVersion().contains("1.8.9")) && config.getFilecon().getBoolean("creature.disablemobai")){
+                    new EntityUtils(st).setAI(ea);
+                }
+                if(config.getFilecon().getBoolean("mcmmo.disable-xp")){
+                    if(config.getFilecon().getBoolean("mcmmo.use-whitelist")){
+                        if(!config.getFilecon().getStringList("mcmmo.whitelist").contains(ea.getType().toString())){
+                            return;
+                        }
+                    }
+                    ea.setMetadata("mcMMO: Spawned Entity", new FixedMetadataValue(st.getServer().getPluginManager().getPlugin("mcMMO"), false));
+                }
             }
-        }
-    }
+        }catch (NullPointerException npe){
+            st.getLogger().log(Level.WARNING, "A werid error has occured with StackMob v" + st.getDescription().getVersion());
+            st.getLogger().log(Level.INFO, "Since this is rare, extra information has been included.");
+            st.getLogger().log(Level.INFO, "Please make sure to notify the author, including all detail below:");
 
+            st.getLogger().info(Boolean.toString(p != null) + ", " + Boolean.toString(ea != null) + ", " + p.isDead() + ", " + ea.isDead() + ", " + st.amountMap.containsKey(p.getUniqueId()) + ", " + st.amountMap.containsKey(ea.getUniqueId()));
+            npe.printStackTrace();
+        }
+
+    }
 }
