@@ -1,7 +1,10 @@
 package uk.antiperson.stackmob;
 
-import org.bstats.Metrics;
-import org.bukkit.*;
+import org.bstats.bukkit.Metrics;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -17,7 +20,10 @@ import uk.antiperson.stackmob.utils.CreatureData;
 import uk.antiperson.stackmob.utils.EntityTranslation;
 import uk.antiperson.stackmob.utils.Updater;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**

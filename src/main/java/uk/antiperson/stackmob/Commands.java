@@ -4,6 +4,7 @@ import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -20,7 +21,7 @@ import java.util.UUID;
 /**
  * Created by nathat on 02/10/16.
  */
-public class Commands implements CommandExecutor{
+public class Commands implements CommandExecutor {
 
 
     private StackMob m;
@@ -28,17 +29,18 @@ public class Commands implements CommandExecutor{
     private String div = ChatColor.GRAY + " - ";
     private String beforeBig = ChatColor.GRAY + "------" + pluginTag.replace(" ", "") + ChatColor.GRAY + "------------------------------";
     private String noPermission = pluginTag + ChatColor.DARK_RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "You do not have the permission to do this!";
-    public Commands(StackMob st){
+
+    public Commands(StackMob st) {
         m = st;
     }
 
 
     // You don't need to keep checking for permission, you know!
-    public boolean onCommand(CommandSender sender, Command cmd, String string, String[] args){
-        if(sender instanceof Player){
+    public boolean onCommand(CommandSender sender, Command cmd, String string, String[] args) {
+        if (sender instanceof Player) {
             Player p = (Player) sender;
-            if(args.length == 0){
-                if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+            if (args.length == 0) {
+                if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                     p.sendMessage(beforeBig);
                     p.sendMessage(ChatColor.YELLOW + "/sm removeall" + div + ChatColor.GOLD + "Removes all stacked entities in loaded chunks.");
                     p.sendMessage(ChatColor.YELLOW + "/sm remove [x] [y] [z]" + div + ChatColor.GOLD + "Removes all stacked entities in a radius around you.");
@@ -47,12 +49,12 @@ public class Commands implements CommandExecutor{
                     p.sendMessage(ChatColor.YELLOW + "/sm stats" + div + ChatColor.GOLD + "Shows details about all the currently stacked mobs.");
                     p.sendMessage(ChatColor.YELLOW + "/sm wand" + div + ChatColor.GOLD + "Gives you the wand of stacked mobs.");
                     p.sendMessage(ChatColor.YELLOW + "Page 1/2 of command help. Type /sm 2 for next page.");
-                }else{
+                } else {
                     p.sendMessage(noPermission);
                 }
-            }else if(args.length == 1){
-                if(args[0].equalsIgnoreCase("2")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
+            } else if (args.length == 1) {
+                if (args[0].equalsIgnoreCase("2")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         p.sendMessage(beforeBig);
                         p.sendMessage(ChatColor.YELLOW + "/sm reset" + div + ChatColor.GOLD + "Resets the config file to default values.");
                         p.sendMessage(ChatColor.YELLOW + "/sm reload" + div + ChatColor.GOLD + "Reloads configuration values into memory.");
@@ -60,11 +62,11 @@ public class Commands implements CommandExecutor{
                         p.sendMessage(ChatColor.YELLOW + "/sm download" + div + ChatColor.GOLD + "Downloads the latest version.");
                         p.sendMessage(ChatColor.YELLOW + "/sm about" + div + ChatColor.GOLD + "Shows information about this plugin.");
                         p.sendMessage(ChatColor.YELLOW + "Page 2/2 of command help.");
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("about")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("about")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         p.sendMessage(beforeBig);
                         p.sendMessage(ChatColor.YELLOW + "StackMob v" + m.getDescription().getVersion() + " by antiPerson (known as BaconPied)");
                         p.sendMessage(ChatColor.YELLOW + "Find out more at " + m.getDescription().getWebsite());
@@ -72,59 +74,59 @@ public class Commands implements CommandExecutor{
                         p.sendMessage(" ");
                         p.sendMessage(ChatColor.YELLOW + "Thanks to everyone who has helped me fix bugs!");
                         p.sendMessage(ChatColor.YELLOW + "Also, thanks to YOU for using this plugin!");
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("update")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("update")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         Updater up = new Updater(m);
                         up.checkUpdate(true, p);
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("removeall")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("removeall")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         removeAll(p);
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("reset")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("reset")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         Configuration config = m.config;
                         config.getFile().delete();
                         config.makeConfig();
                         m.config.reloadConfig();
                         p.sendMessage(pluginTag + ChatColor.GREEN + "The configuration file has been reset successfully!");
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("stats")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("stats")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         displayStats(p);
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("remove")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("remove")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm remove [x] [y] [z]");
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("unstack")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("unstack")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm unstack [x] [y] [z]");
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("reload")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("reload")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         m.config.reloadConfig();
                         p.sendMessage(pluginTag + ChatColor.GREEN + "The configuration has been reloaded successfully!");
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("wand")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("wand")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         ItemStack is = new ItemStack(Material.STICK, 1);
                         ItemMeta im = is.getItemMeta();
                         im.setDisplayName(ChatColor.AQUA + "The wand of stacked monsters.");
@@ -132,100 +134,102 @@ public class Commands implements CommandExecutor{
                         is.setItemMeta(im);
                         p.getInventory().addItem(is);
                         p.sendMessage(pluginTag + ChatColor.GREEN + "The wand has been added to your inventory.");
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("download")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("download")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         Updater up = new Updater(m);
                         p.sendMessage(pluginTag + ChatColor.GREEN + "Downloading latest update from spigotmc.org...");
-                        try{
+                        try {
                             up.downloadUpdate();
                             p.sendMessage(pluginTag + ChatColor.GREEN + "Downloaded the latest file! Make sure to restart your sever for this to take effect!");
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Something went wrong while trying to do that, check console for more details.");
                             e.printStackTrace();
                         }
 
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("debug")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("debug")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         m.debuggerMode = !m.debuggerMode;
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else if(args[0].equalsIgnoreCase("spawnstack")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+                } else if (args[0].equalsIgnoreCase("spawnstack")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm spawnstack [entity type] [stack size]");
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else {
+                } else {
                     p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
                 }
-            }else if(args.length == 3){
-                if(args[0].equalsIgnoreCase("spawnstack")){
-                    if(p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")){
+            } else if (args.length == 3) {
+                if (args[0].equalsIgnoreCase("spawnstack")) {
+                    if (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*")) {
                         boolean did = false;
-                        for(EntityType et : EntityType.values()){
-                            if(et.toString().equalsIgnoreCase(args[1])){
+                        for (EntityType et : EntityType.values()) {
+                            if (et.toString().equalsIgnoreCase(args[1])) {
                                 did = true;
                             }
                         }
-                        if(did && Integer.valueOf(args[2]) != null){
+                        if (did && Integer.valueOf(args[2]) != null) {
                             Entity e = p.getWorld().spawnEntity(p.getLocation(), EntityType.valueOf(args[1].toUpperCase()));
                             m.noStack.add(e.getUniqueId());
                             m.amountMap.put(e.getUniqueId(), Integer.valueOf(args[2]));
                             p.sendMessage(pluginTag + ChatColor.GREEN + "Sucessfully spawned a " + e.getType().toString() + " with a stack size of " + args[2]);
-                        }else{
+                        } else {
                             p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
                         }
-                    }else{
+                    } else {
                         p.sendMessage(noPermission);
                     }
-                }else{
+                } else {
                     p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
                 }
-            }else if(args.length == 4){
-                if(args[0].equalsIgnoreCase("remove") && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
-                    if(checkDouble(args[1]) && checkDouble(args[2]) && checkDouble(args[3])){
+            } else if (args.length == 4) {
+                if (args[0].equalsIgnoreCase("remove") && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))) {
+                    if (checkDouble(args[1]) && checkDouble(args[2]) && checkDouble(args[3])) {
                         removeAll(p, Double.valueOf(args[1]), Double.valueOf(args[2]), Double.valueOf(args[3]));
-                    }else{
+                    } else {
                         p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "The values you entered are not doubles!");
                     }
-                }else if(args[0].equalsIgnoreCase("unstack") && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
-                    if(checkDouble(args[1]) && checkDouble(args[2]) && checkDouble(args[3])){
+                } else if (args[0].equalsIgnoreCase("unstack") && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))) {
+                    if (checkDouble(args[1]) && checkDouble(args[2]) && checkDouble(args[3])) {
                         unStack(p, Double.valueOf(args[1]), Double.valueOf(args[2]), Double.valueOf(args[3]));
-                    }else{
+                    } else {
                         p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "The values you entered are not doubles!");
                     }
-                }else{
+                } else {
                     p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
                 }
 
-            }else{
-                if(args[0].equalsIgnoreCase("remove") && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
+            } else {
+                if (args[0].equalsIgnoreCase("remove") && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))) {
                     p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm remove [x] [y] [z]");
-                }else if(args[0].equalsIgnoreCase("unstack")  && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))){
+                } else if (args[0].equalsIgnoreCase("unstack") && (p.hasPermission("stackmob.admin") || p.hasPermission("stackmob.*"))) {
                     p.sendMessage(pluginTag + ChatColor.YELLOW + "Usage: /sm unstack [x] [y] [z]");
-                }else{
+                } else {
                     p.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Invaild arguments!");
                 }
             }
-        }else{
-            sender.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Not a player!");
+        } else {
+            if (sender instanceof ConsoleCommandSender && args[0].equalsIgnoreCase("removeall")) {
+                removeAll(sender);
+            } else sender.sendMessage(pluginTag + ChatColor.RED + ChatColor.BOLD + "Error: " + ChatColor.RESET + ChatColor.RED + "Not a player!");
         }
         return false;
     }
 
-    private void removeAll(Player p){
+    private void removeAll(CommandSender p) {
         int counter = 0;
         int counterAll = 0;
-        for(World world : Bukkit.getWorlds()){
-            for(LivingEntity le : world.getLivingEntities()){
-                if(m.amountMap.containsKey(le.getUniqueId())){
+        for (World world : Bukkit.getWorlds()) {
+            for (LivingEntity le : world.getLivingEntities()) {
+                if (m.amountMap.containsKey(le.getUniqueId())) {
                     le.remove();
                     counter++;
                     counterAll = counterAll + m.amountMap.get(le.getUniqueId());
@@ -236,11 +240,11 @@ public class Commands implements CommandExecutor{
         p.sendMessage(pluginTag + ChatColor.GREEN + "Removed " + counter + " (" + counterAll + " stacked) entities!");
     }
 
-    private void removeAll(Player p, double x, double y, double z){
+    private void removeAll(Player p, double x, double y, double z) {
         int counter = 0;
         int counterAll = 0;
-        for(Entity le : p.getNearbyEntities(x, y, z)){
-            if(m.amountMap.containsKey(le.getUniqueId())){
+        for (Entity le : p.getNearbyEntities(x, y, z)) {
+            if (m.amountMap.containsKey(le.getUniqueId())) {
                 le.remove();
                 counter++;
                 counterAll = counterAll + m.amountMap.get(le.getUniqueId());
@@ -250,38 +254,38 @@ public class Commands implements CommandExecutor{
         p.sendMessage(pluginTag + ChatColor.GREEN + "Removed " + counter + " (" + counterAll + " stacked) entities!");
     }
 
-    public void displayStats(Player p){
+    public void displayStats(Player p) {
         int count1 = 0;
         int countMegered1 = 0;
         HashMap<EntityType, Integer> mobAmounts = new HashMap<EntityType, Integer>();
-        for(World world : Bukkit.getWorlds()){
-            for(LivingEntity le : world.getLivingEntities()){
-                if(m.amountMap.containsKey(le.getUniqueId())){
+        for (World world : Bukkit.getWorlds()) {
+            for (LivingEntity le : world.getLivingEntities()) {
+                if (m.amountMap.containsKey(le.getUniqueId())) {
                     count1++;
                     countMegered1 = countMegered1 + m.amountMap.get(le.getUniqueId());
-                    if(mobAmounts.containsKey(le.getType())){
+                    if (mobAmounts.containsKey(le.getType())) {
                         mobAmounts.put(le.getType(), (mobAmounts.get(le.getType()) + m.amountMap.get(le.getUniqueId())));
-                    }else{
+                    } else {
                         mobAmounts.put(le.getType(), m.amountMap.get(le.getUniqueId()));
                     }
                 }
             }
         }
         int countChunk = 0;
-        int countChunkMergered =  0;
-        for(Entity e : p.getLocation().getChunk().getEntities()){
-            if(e instanceof LivingEntity){
-                if(m.amountMap.containsKey(e.getUniqueId())){
+        int countChunkMergered = 0;
+        for (Entity e : p.getLocation().getChunk().getEntities()) {
+            if (e instanceof LivingEntity) {
+                if (m.amountMap.containsKey(e.getUniqueId())) {
                     countChunk++;
                     countChunkMergered = countChunkMergered + m.amountMap.get(e.getUniqueId());
                 }
             }
         }
         int countTotal = 0;
-        for(UUID uuid : m.amountMap.keySet()){
+        for (UUID uuid : m.amountMap.keySet()) {
             countTotal = countTotal + m.amountMap.get(uuid);
         }
-        for(Location loc : m.locMap.keySet()){
+        for (Location loc : m.locMap.keySet()) {
             countTotal = countTotal + m.locMap.get(loc);
         }
         int all = m.amountMap.size() + m.locMap.size();
@@ -290,22 +294,22 @@ public class Commands implements CommandExecutor{
                 ChatColor.GOLD + "Loaded in world: " + ChatColor.YELLOW + count1 + " (" + countMegered1 + " merged)");
         p.sendMessage(ChatColor.GOLD + "This server: " + ChatColor.YELLOW + all + " (" + countTotal + " merged) ");
         String str = "";
-        for(EntityType et : mobAmounts.keySet()){
+        for (EntityType et : mobAmounts.keySet()) {
             str = str + ChatColor.GOLD + mobAmounts.get(et) + "x " + ChatColor.YELLOW + et.toString() + ", ";
         }
         p.sendMessage(ChatColor.GREEN + "Stack amount breakdown by entity type (loaded entities):");
         p.sendMessage(str);
     }
 
-    public void unStack(Player p, double x, double y, double z){
+    public void unStack(Player p, double x, double y, double z) {
         int counta = 0;
         int countb = 1;
         EntityUtils eu = new EntityUtils(m);
-        for(Entity e : p.getNearbyEntities(x,y,z)){
-            if(e instanceof LivingEntity){
-                if(m.amountMap.containsKey(e.getUniqueId())){
+        for (Entity e : p.getNearbyEntities(x, y, z)) {
+            if (e instanceof LivingEntity) {
+                if (m.amountMap.containsKey(e.getUniqueId())) {
                     counta++;
-                    for(int i = 1; i < m.amountMap.get(e.getUniqueId()); i++){
+                    for (int i = 1; i < m.amountMap.get(e.getUniqueId()); i++) {
                         countb++;
                         Entity eas = eu.createEntity(e, false, true);
                         m.noStack.add(eas.getUniqueId());
@@ -320,10 +324,10 @@ public class Commands implements CommandExecutor{
     }
 
 
-    private boolean checkDouble(String input){
-        try{
+    private boolean checkDouble(String input) {
+        try {
             return Double.valueOf(input) != null;
-        }catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             return false;
         }
     }
