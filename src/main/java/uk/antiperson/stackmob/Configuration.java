@@ -77,6 +77,7 @@ public class Configuration {
         filecon.set("creature.kill-all.drops.blacklist-enabled", true);
         filecon.set("creature.kill-all.drops.blacklist", Arrays.asList("IRON_CHESTPLATE", "BOW", "SWORD"));
         filecon.set("creature.kill-all.drops.zombie-only-multiply-rottenflash", true);
+        filecon.set("creature.kill-all.drops.skeletons-dont-multiply-bows", true);
         filecon.set("creature.kill-all.drops.ignore-armor", true);
         filecon.set("creature.kill-all.drops.chances-enabled", true);
         filecon.set("creature.kill-all.drops.chance.IRON_CHESTPLATE", 0.5);
@@ -260,6 +261,7 @@ public class Configuration {
             updated = true;
             filecon.set("creature.update-metadata", true);
             filecon.set("creature.kill-all.drops.zombie-only-multiply-rottenflash", true);
+            filecon.set("creature.kill-all.drops.skeletons-dont-multiply-bows", true);
         }
         if(!filecon.isBoolean("creature.bigger-priority")){
             updated = true;

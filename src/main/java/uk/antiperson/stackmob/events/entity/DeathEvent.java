@@ -147,10 +147,17 @@ public class DeathEvent implements Listener {
                            continue;
                        }
                    }else{
-                       if (is.getType() != Material.ROTTEN_FLESH){
+                       if (is.getType() != Material.ROTTEN_FLESH) {
                            continue;
                        }
                    }
+                }
+            }
+            if (ea instanceof Skeleton) {
+                if (config.getFilecon().getBoolean("creature.kill-all.drops.skeletons-dont-multiply-bows")) {
+                    if (is.getType().equals(Material.BOW)) {
+                        continue;
+                    }
                 }
             }
             if(config.getFilecon().getBoolean("creature.kill-all.drops.blacklist-enabled")){
